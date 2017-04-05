@@ -5,7 +5,7 @@ bench: benchmark
 benchmark:
 	stack bench
 
-build: 
+build:
 	stack build
 
 clean:
@@ -14,6 +14,7 @@ clean:
 # dump the template haskell
 dump-splices: dump-th
 dump-th:
+	mkdir -p test/test-dir/empty-dir
 	-stack build --ghc-options="-ddump-splices"
 	@echo
 	@echo "Splice files:"
@@ -30,7 +31,7 @@ watch:
 
 # Watch for changes.
 watch-test: watch-tests
-watch-tests:
+watch-tests: test/test-dir/empty-dir
 	stack test --file-watch --fast .
 
 # Run ghci using stack.
@@ -38,7 +39,10 @@ repl: ghci
 ghci:
 	stack ghci
 
-test:
+test/test-dir/empty-dir:
+	mkdir -p test/test-dir/empty-dir
+
+test: test/test-dir/empty-dir
 	stack test
 
 # Run hlint.
