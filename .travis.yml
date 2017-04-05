@@ -136,6 +136,7 @@ install:
 
 script:
 - |
+  mkdir -p test/test-dir/empty-dir
   case "$BUILD" in
     stack)
       stack --no-terminal $ARGS test --haddock --no-haddock-deps
