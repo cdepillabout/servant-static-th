@@ -20,7 +20,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , blaze-html
                      , bytestring
-                     , directory
+                     , directory >= 1.2.5.0
                      , filepath
                      , semigroups
                      , servant
