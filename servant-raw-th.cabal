@@ -22,6 +22,7 @@ library
                      , bytestring
                      , directory
                      , filepath
+                     , semigroups
                      , servant
                      , servant-blaze
                      , servant-server
