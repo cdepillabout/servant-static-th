@@ -1,4 +1,6 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Servant.Raw.TH.Internal where
@@ -15,7 +17,8 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Language.Haskell.TH
        (Dec, Exp, Q, Type, appE, appT, clause, conT, funD, litE, litT,
         mkName, normalB, runIO, sigD, stringL, strTyLit, tySynD)
-import Language.Haskell.TH.Syntax (addDependentFile)
+import Language.Haskell.TH.Syntax
+       (Quasi, addDependentFile, qAddDependentFile, qRunIO)
 import Servant.HTML.Blaze (HTML)
 import Servant.API ((:<|>)((:<|>)), (:>), Get)
 import Servant.Server (ServerT)
@@ -35,45 +38,44 @@ frontEndServerName = "frontEndServer"
 
 data FileTree
   = FileTreeFile FilePath ByteString
-  | FileTreeDirectory FilePath (NonEmpty FileTree)
+  | FileTreeDir FilePath (NonEmpty FileTree)
   deriving (Eq, Read, Show)
 
 data FileType
   = FileTypeFile FilePath
-  | FileTypeDirectory FilePath
+  | FileTypeDir FilePath
   deriving (Eq, Read, Show)
 
-getFileType :: FilePath -> Q FileType
+getFileType :: FilePath -> IO FileType
 getFileType path = do
-  isFile <- runIO $ doesFileExist path
-  isDir <- runIO $ doesDirectoryExist path
+  isFile <- doesFileExist path
+  isDir <- doesDirectoryExist path
   case (isFile, isDir) of
     (True, _) -> pure $ FileTypeFile path
-    (_, True) -> pure $ FileTypeDirectory path
+    (_, True) -> pure $ FileTypeDir path
     _ ->
       fail $
         "getFileType: Could not determine the type of file \"" <> path <> "\""
 
-fileTypeToFileTree :: FileType -> Q (Maybe FileTree)
-fileTypeToFileTree (FileTypeFile filePath) = do
-  addDependentFile filePath
-  Just . FileTreeFile filePath <$> runIO (ByteString.readFile filePath)
-fileTypeToFileTree (FileTypeDirectory dir) = do
+fileTypeToFileTree :: FileType -> IO (Maybe FileTree)
+fileTypeToFileTree (FileTypeFile filePath) =
+  Just . FileTreeFile filePath <$> ByteString.readFile filePath
+fileTypeToFileTree (FileTypeDir dir) = do
   fileTrees <- getFileTree dir
   pure $
     case fileTrees of
       [] -> Nothing
-      (ft:fts) -> Just $ FileTreeDirectory dir $ ft :| fts
+      (ft:fts) -> Just . FileTreeDir dir $ ft :| fts
 
-getFileTree :: FilePath -> Q [FileTree]
+getFileTree :: FilePath -> IO [FileTree]
 getFileTree templateDir = do
-  filePaths <- runIO $ listDirectory templateDir
+  filePaths <- qRunIO $ listDirectory templateDir
   let fullFilePaths = fmap (templateDir </>) filePaths
   fileTypes <- traverse getFileType fullFilePaths
   fileTreesWithMaybe <- traverse fileTypeToFileTree fileTypes
   pure $ catMaybes fileTreesWithMaybe
 
-getFileTreeIgnoreEmpty :: FilePath -> Q (NonEmpty FileTree)
+getFileTreeIgnoreEmpty :: FilePath -> IO (NonEmpty FileTree)
 getFileTreeIgnoreEmpty templateDir = do
   fileTrees <- getFileTree templateDir
   case fileTrees of
@@ -88,9 +90,10 @@ getFileTreeIgnoreEmpty templateDir = do
 ---------
 
 fileTreeToApiType :: FileTree -> Q Type
-fileTreeToApiType (FileTreeFile filePath _) =
+fileTreeToApiType (FileTreeFile filePath _) = do
+  addDependentFile filePath
   servantNamedApiT (takeFileName filePath) [t|Get '[HTML] Html|]
-fileTreeToApiType (FileTreeDirectory filePath fileTrees) =
+fileTreeToApiType (FileTreeDir filePath fileTrees) =
   servantNamedApiManyT (takeFileName filePath) nonEmptyApiTypesQ
   where
     nonEmptyApiTypesQ :: NonEmpty (Q Type)
@@ -113,7 +116,7 @@ combineWithType combiningType = appT . appT combiningType
 
 createApiType :: FilePath -> Q Type
 createApiType templateDir = do
-  fileTree <- getFileTreeIgnoreEmpty templateDir
+  fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
   combineWithServantOrT $ fmap fileTreeToApiType fileTree
 
 createApiFrontEndType :: Q Type
@@ -138,16 +141,17 @@ combineWithServantOr :: NonEmpty (Q Exp) -> Q Exp
 combineWithServantOr = foldl1 $ combineWithExp [e|(:<|>)|]
 
 fileTreeToServer :: FileTree -> Q Exp
-fileTreeToServer (FileTreeFile _ fileContents) =
+fileTreeToServer (FileTreeFile filePath fileContents) = do
+  addDependentFile filePath
   let fileContentsString = unpack $ decodeUtf8With lenientDecode fileContents
       fileContentsStringL = litE $ stringL fileContentsString
-  in appE [e|pure . (preEscapedToHtml :: String -> Html)|] fileContentsStringL
-fileTreeToServer (FileTreeDirectory _ fileTrees) =
+  appE [e|pure . (preEscapedToHtml :: String -> Html)|] fileContentsStringL
+fileTreeToServer (FileTreeDir _ fileTrees) =
   combineWithServantOr $ fmap fileTreeToServer fileTrees
 
 createServerExp :: FilePath -> Q Exp
 createServerExp templateDir = do
-  fileTree <- getFileTreeIgnoreEmpty templateDir
+  fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
   combineWithServantOr $ fmap fileTreeToServer fileTree
 
 createServerFrontEndExp :: Q Exp
