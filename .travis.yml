@@ -70,9 +70,9 @@ matrix:
     addons: {apt: {packages: [libgmp-dev]}}
 
   # Build on OS X in addition to Linux
-  - env: BUILD=stack ARGS="--resolver lts-6"
-    compiler: ": #stack 7.10.3 (lts-6) osx"
-    os: osx
+  # - env: BUILD=stack ARGS="--resolver lts-6"
+  #   compiler: ": #stack 7.10.3 (lts-6) osx"
+  #   os: osx
 
   - env: BUILD=stack ARGS="--resolver lts-7"
     compiler: ": #stack 8.0.1 (lts-7) osx"
