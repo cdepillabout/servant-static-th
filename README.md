@@ -1,14 +1,14 @@
 
-Servant.Raw.TH
-============================
+Servant.Static.TH
+==================
 
-[![Build Status](https://secure.travis-ci.org/cdepillabout/servant-raw-th.svg)](http://travis-ci.org/cdepillabout/servant-raw-th)
-[![Hackage](https://img.shields.io/hackage/v/servant-raw-th.svg)](https://hackage.haskell.org/package/servant-raw-th)
-[![Stackage LTS](http://stackage.org/package/servant-raw-th/badge/lts)](http://stackage.org/lts/package/servant-raw-th)
-[![Stackage Nightly](http://stackage.org/package/servant-raw-th/badge/nightly)](http://stackage.org/nightly/package/servant-raw-th)
+[![Build Status](https://secure.travis-ci.org/cdepillabout/servant-static-th.svg)](http://travis-ci.org/cdepillabout/servant-static-th)
+[![Hackage](https://img.shields.io/hackage/v/servant-static-th.svg)](https://hackage.haskell.org/package/servant-static-th)
+[![Stackage LTS](http://stackage.org/package/servant-static-th/badge/lts)](http://stackage.org/lts/package/servant-static-th)
+[![Stackage Nightly](http://stackage.org/package/servant-static-th/badge/nightly)](http://stackage.org/nightly/package/servant-static-th)
 ![BSD3 license](https://img.shields.io/badge/license-BSD3-blue.svg)
 
-`servant-raw-th`
+`servant-static-th`
 
 For documentation and usage examples, see the
-[documentation](https://hackage.haskell.org/package/servant-raw-th) on Hackage.
+[documentation](https://hackage.haskell.org/package/servant-static-th) on Hackage.

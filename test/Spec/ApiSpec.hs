@@ -12,7 +12,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit ((@?=), testCase)
 import Text.Blaze.Html (Html)
 
-import Servant.Raw.TH (JS, createApiDec)
+import Servant.Static.TH (JS, createApiDec)
 
 import Spec.TestDirLocation (testDir)
 

@@ -10,7 +10,7 @@ import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit ((@?=), testCase)
 
-import Servant.Raw.TH.Internal
+import Servant.Static.TH.Internal
        (FileTree(..), FileType(..), getFileTreeIgnoreEmpty, getFileType)
 
 import Spec.TastyHelpers ((@!), anyException)

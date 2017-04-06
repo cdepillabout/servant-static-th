@@ -11,7 +11,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Servant.Raw.TH.Internal where
+module Servant.Static.TH.Internal where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
@@ -61,7 +61,8 @@ extensionMimeTypeMap =
 
 byteStringToExpression :: ByteString -> Q Exp
 byteStringToExpression byteString =
-  [e|pure byteString|]
+  let word8List = ByteString.unpack byteString
+  in [e|pure $ ByteString.pack word8List|]
 
 htmlToExpression :: ByteString -> Q Exp
 htmlToExpression byteString =
