@@ -1,31 +1,66 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Servant.Raw.TH.Internal where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as LByteString
 import Data.Foldable (foldl1)
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty((:|)))
 import Data.Maybe (catMaybes)
 import Data.Monoid ((<>))
+import Data.Proxy (Proxy)
 import Data.Text (unpack)
 import Data.Text.Encoding (decodeUtf8With)
 import Data.Text.Encoding.Error (lenientDecode)
+import Data.Typeable (Typeable)
 import Language.Haskell.TH
        (Dec, Exp, Q, Type, appE, appT, clause, conT, funD, litE, litT,
-        mkName, normalB, runIO, sigD, stringL, strTyLit, tySynD)
+        mkName, normalB, promotedConsT, promotedNilT, runIO, sigD, stringL,
+        strTyLit, tySynD)
 import Language.Haskell.TH.Syntax (addDependentFile)
+import Network.HTTP.Media (MediaType, (//))
 import Servant.HTML.Blaze (HTML)
-import Servant.API ((:<|>)((:<|>)), (:>), Get)
+import Servant.API
+       (Accept(contentType), Get, MimeRender(mimeRender), (:<|>)((:<|>)),
+        (:>))
 import Servant.Server (ServerT)
 import System.Directory
        (doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath ((</>), takeFileName)
+import System.FilePath ((</>), takeExtension, takeFileName)
 import Text.Blaze.Html (Html, preEscapedToHtml)
+
+----------------
+-- Mime Types --
+----------------
+
+extensionToMimeType :: FilePath -> (Q Type, Q Type)
+extensionToMimeType file =
+  case takeExtension file of
+    ".html" -> ([t|HTML|], [t|Html|])
+    ".js" -> ([t|JS|], [t|ByteString|])
+
+data JS deriving Typeable
+
+instance Accept JS where
+  contentType :: Proxy JS -> MediaType
+  contentType _ = "application" // "javascript"
+
+instance MimeRender JS LByteString.ByteString where
+  mimeRender :: Proxy JS -> LByteString.ByteString -> LByteString.ByteString
+  mimeRender _ = id
+
+------------------------------------
+-- Hard-coded Frontend file paths --
+------------------------------------
 
 frontEndTemplateDir :: FilePath
 frontEndTemplateDir = "frontend" </> "dist"
@@ -35,6 +70,10 @@ frontEndApiName = "FrontEnd"
 
 frontEndServerName :: String
 frontEndServerName = "frontEndServer"
+
+----------------------------------------
+-- Helper functions for reading files --
+----------------------------------------
 
 data FileTree
   = FileTreeFile FilePath ByteString
@@ -89,10 +128,17 @@ getFileTreeIgnoreEmpty templateDir = do
 -- Api --
 ---------
 
+singletonPromotedListT :: Q Type -> Q Type
+singletonPromotedListT singleT =
+  appT (appT promotedConsT singleT) promotedNilT
+
 fileTreeToApiType :: FileTree -> Q Type
 fileTreeToApiType (FileTreeFile filePath _) = do
   addDependentFile filePath
-  servantNamedApiT (takeFileName filePath) [t|Get '[HTML] Html|]
+  let (mimeT, respT) = extensionToMimeType filePath
+      contentTypeT = singletonPromotedListT mimeT
+      respApiTypeT = appT (appT [t|Get|] contentTypeT) respT
+  servantNamedApiT (takeFileName filePath) respApiTypeT
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
   servantNamedApiManyT (takeFileName filePath) nonEmptyApiTypesQ
   where

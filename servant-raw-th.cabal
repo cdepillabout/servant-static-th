@@ -22,6 +22,7 @@ library
                      , bytestring
                      , directory >= 1.2.5.0
                      , filepath
+                     , http-media
                      , semigroups
                      , servant
                      , servant-blaze
