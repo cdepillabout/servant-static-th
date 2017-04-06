@@ -18,8 +18,7 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Language.Haskell.TH
        (Dec, Exp, Q, Type, appE, appT, clause, conT, funD, litE, litT,
         mkName, normalB, runIO, sigD, stringL, strTyLit, tySynD)
-import Language.Haskell.TH.Syntax
-       (Quasi, addDependentFile, qAddDependentFile, qRunIO)
+import Language.Haskell.TH.Syntax (addDependentFile)
 import Servant.HTML.Blaze (HTML)
 import Servant.API ((:<|>)((:<|>)), (:>), Get)
 import Servant.Server (ServerT)
@@ -70,7 +69,7 @@ fileTypeToFileTree (FileTypeDir dir) = do
 
 getFileTree :: FilePath -> IO [FileTree]
 getFileTree templateDir = do
-  filePaths <- qRunIO $ sort <$> listDirectory templateDir
+  filePaths <- sort <$> listDirectory templateDir
   let fullFilePaths = fmap (templateDir </>) filePaths
   fileTypes <- traverse getFileType fullFilePaths
   fileTreesWithMaybe <- traverse fileTypeToFileTree fileTypes
@@ -176,12 +175,12 @@ createServerFrontEndDec =
 -- Server and API --
 --------------------
 
-createDecs :: String -> String -> FilePath -> Q [Dec]
-createDecs apiName serverName templateDir =
+createApiAndServerDecs :: String -> String -> FilePath -> Q [Dec]
+createApiAndServerDecs apiName serverName templateDir =
   let apiDecs = createApiDec apiName templateDir
       serverDecs = createServerDec apiName serverName templateDir
   in mappend <$> apiDecs <*> serverDecs
 
-createFrontEndDecs :: Q [Dec]
-createFrontEndDecs =
-  createDecs frontEndApiName frontEndServerName frontEndTemplateDir
+createApiAndServerFrontEndDecs :: Q [Dec]
+createApiAndServerFrontEndDecs =
+  createApiAndServerDecs frontEndApiName frontEndServerName frontEndTemplateDir

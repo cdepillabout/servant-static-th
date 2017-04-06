@@ -1,8 +1,4 @@
 {-# LANGUAGE DataKinds #-}
--- {-# LANGUAGE OverloadedLists #-}
--- {-# LANGUAGE OverloadedStrings #-}
--- {-# LANGUAGE NoMonomorphismRestriction #-}
--- {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators #-}
 

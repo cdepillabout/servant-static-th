@@ -47,6 +47,7 @@ test-suite servant-raw-th-test
   main-is:             Spec.hs
   other-modules:       Spec.ApiSpec
                      , Spec.HelperFuncSpec
+                     , Spec.ServerSpec
                      , Spec.TastyHelpers
                      , Spec.TestDirLocation
   hs-source-dirs:      test
@@ -54,11 +55,15 @@ test-suite servant-raw-th-test
                      , blaze-html
                      , directory
                      , filepath
+                     , hspec-wai
                      , tasty
+                     , tasty-hspec
                      , tasty-hunit
                      , servant
                      , servant-blaze
                      , servant-raw-th
+                     , servant-server
+                     , wai
   default-language:    Haskell2010
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
 
