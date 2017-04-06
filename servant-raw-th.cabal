@@ -55,6 +55,7 @@ test-suite servant-raw-th-test
   hs-source-dirs:      test
   build-depends:       base
                      , blaze-html
+                     , bytestring
                      , directory
                      , filepath
                      , hspec-wai

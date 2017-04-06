@@ -29,9 +29,8 @@ import Data.Text.Encoding (decodeUtf8With)
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Typeable (Typeable)
 import Language.Haskell.TH
-       (Dec, Exp, Q, Type, appE, appT, clause, conT, funD, litE, litT,
-        mkName, normalB, promotedConsT, promotedNilT, runIO, sigD, stringL,
-        strTyLit, tySynD)
+       (Dec, Exp, Q, Type, appE, appT, clause, conT, funD, litT, mkName,
+        normalB, runIO, sigD, strTyLit, tySynD)
 import Language.Haskell.TH.Syntax (addDependentFile)
 import Network.HTTP.Media (MediaType, (//))
 import Servant.HTML.Blaze (HTML)
@@ -62,15 +61,12 @@ extensionMimeTypeMap =
 
 byteStringToExpression :: ByteString -> Q Exp
 byteStringToExpression byteString =
-  let word8List = ByteString.unpack byteString
-  -- in [e|pure word8List|]
-  in [e|pure byteString|]
+  [e|pure byteString|]
 
 htmlToExpression :: ByteString -> Q Exp
 htmlToExpression byteString =
   let fileContentsString = unpack $ decodeUtf8With lenientDecode byteString
-      fileContentsStringL = litE $ stringL fileContentsString
-  in appE [e|pure . (preEscapedToHtml :: String -> Html)|] fileContentsStringL
+  in [e|pure $ (preEscapedToHtml :: String -> Html) fileContentsString|]
 
 -- | Remove a leading period from a string.
 --
@@ -123,17 +119,15 @@ extensionToMimeTypeInfo file =
 getExtension :: FilePath -> FilePath
 getExtension = removeLeadingPeriod . takeExtension
 
-
-
 data JS deriving Typeable
 
 instance Accept JS where
   contentType :: Proxy JS -> MediaType
   contentType _ = "application" // "javascript"
 
-instance MimeRender JS LByteString.ByteString where
-  mimeRender :: Proxy JS -> LByteString.ByteString -> LByteString.ByteString
-  mimeRender _ = id
+instance MimeRender JS ByteString where
+  mimeRender :: Proxy JS -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
 
 ------------------------------------
 -- Hard-coded Frontend file paths --
@@ -205,31 +199,18 @@ getFileTreeIgnoreEmpty templateDir = do
 -- Api --
 ---------
 
-singletonPromotedListT :: Q Type -> Q Type
-singletonPromotedListT singleT =
-  appT (appT promotedConsT singleT) promotedNilT
-
 fileTreeToApiType :: FileTree -> Q Type
 fileTreeToApiType (FileTreeFile filePath _) = do
   addDependentFile filePath
   MimeTypeInfo mimeT respT _ <- extensionToMimeTypeInfoEx filePath
-  let fileNameLit = litT $ strTyLit $ takeFileName filePath
-  [t|$(fileNameLit) :> Get '[$(mimeT)] $(respT)|]
+  let fileNameLitT = litT $ strTyLit $ takeFileName filePath
+  [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
-  servantNamedApiManyT (takeFileName filePath) nonEmptyApiTypesQ
+  let fileNameLitT = litT $ strTyLit $ takeFileName filePath
+  in [t|$(fileNameLitT) :> $(combineWithServantOrT nonEmptyApiTypesQ)|]
   where
     nonEmptyApiTypesQ :: NonEmpty (Q Type)
     nonEmptyApiTypesQ = fmap fileTreeToApiType fileTrees
-
-servantNamedApiT :: String -> Q Type -> Q Type
-servantNamedApiT name apiT =
-  -- let nameT = appT [t|(:>)|] . litT $ strTyLit name
-  -- in appT nameT apiT
-  [t|$(litT $ strTyLit name) :> $(apiT)|]
-
-servantNamedApiManyT :: String -> NonEmpty (Q Type) -> Q Type
-servantNamedApiManyT name apiTs =
-  servantNamedApiT name $ combineWithServantOrT apiTs
 
 combineWithServantOrT :: NonEmpty (Q Type) -> Q Type
 combineWithServantOrT = foldl1 $ combineWithType [t|(:<|>)|]
@@ -266,9 +247,8 @@ combineWithServantOr = foldl1 $ combineWithExp [e|(:<|>)|]
 fileTreeToServer :: FileTree -> Q Exp
 fileTreeToServer (FileTreeFile filePath fileContents) = do
   addDependentFile filePath
-  let fileContentsString = unpack $ decodeUtf8With lenientDecode fileContents
-      fileContentsStringL = litE $ stringL fileContentsString
-  appE [e|pure . (preEscapedToHtml :: String -> Html)|] fileContentsStringL
+  MimeTypeInfo _ _ contentToExp <- extensionToMimeTypeInfoEx filePath
+  contentToExp fileContents
 fileTreeToServer (FileTreeDir _ fileTrees) =
   combineWithServantOr $ fmap fileTreeToServer fileTrees
 

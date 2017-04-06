@@ -51,6 +51,9 @@ getFileTreeIgnoreEmptyTests =
                   [ FileTreeFile
                       (testDir </> "dir" </> "inner-file.html")
                       "Inner File\n"
+                  , FileTreeFile
+                      (testDir </> "dir" </> "test.js")
+                      "console.log(\"hello world\");\n"
                   ]
               , FileTreeFile
                   (testDir </> "hello.html")
