@@ -8,6 +8,7 @@ module Servant.Raw.TH.Internal where
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Foldable (foldl1)
+import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty((:|)))
 import Data.Maybe (catMaybes)
 import Data.Monoid ((<>))
@@ -69,7 +70,7 @@ fileTypeToFileTree (FileTypeDir dir) = do
 
 getFileTree :: FilePath -> IO [FileTree]
 getFileTree templateDir = do
-  filePaths <- qRunIO $ listDirectory templateDir
+  filePaths <- qRunIO $ sort <$> listDirectory templateDir
   let fullFilePaths = fmap (templateDir </>) filePaths
   fileTypes <- traverse getFileType fullFilePaths
   fileTreesWithMaybe <- traverse fileTypeToFileTree fileTypes

@@ -4,6 +4,7 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import Test.Tasty (TestTree, defaultMain, testGroup)
 
+import Spec.ApiSpec (apiTests)
 import Spec.HelperFuncSpec (helperFuncTests)
 import Spec.TestDirLocation (testDir)
 
@@ -13,4 +14,4 @@ main = do
   defaultMain tests
 
 tests :: TestTree
-tests = testGroup "tests" [helperFuncTests]
+tests = testGroup "tests" [helperFuncTests, apiTests]
