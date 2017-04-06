@@ -45,6 +45,9 @@ library
 test-suite servant-raw-th-test
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
+  other-modules:       Spec.HelperFuncSpec
+                     , Spec.TastyHelpers
+                     , Spec.TestDirLocation
   hs-source-dirs:      test
   build-depends:       base
                      , directory
