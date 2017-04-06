@@ -1,17 +1,23 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Servant.Raw.TH.Internal where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LByteString
+import Data.Map (Map)
+import qualified Data.Map as Map
 import Data.Foldable (foldl1)
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty((:|)))
@@ -42,11 +48,82 @@ import Text.Blaze.Html (Html, preEscapedToHtml)
 -- Mime Types --
 ----------------
 
-extensionToMimeType :: FilePath -> (Q Type, Q Type)
-extensionToMimeType file =
-  case takeExtension file of
-    ".html" -> ([t|HTML|], [t|Html|])
-    ".js" -> ([t|JS|], [t|ByteString|])
+data MimeTypeInfo = MimeTypeInfo
+  { mimeTypeInfoContentType :: Q Type
+  , mimeTypeInfoRespType :: Q Type
+  , mimeTypeInfoToExpression :: ByteString -> Q Exp
+  }
+
+extensionMimeTypeMap :: Map String MimeTypeInfo
+extensionMimeTypeMap =
+  [ ("html", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExpression)
+  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] byteStringToExpression)
+  ]
+
+byteStringToExpression :: ByteString -> Q Exp
+byteStringToExpression byteString =
+  let word8List = ByteString.unpack byteString
+  -- in [e|pure word8List|]
+  in [e|pure byteString|]
+
+htmlToExpression :: ByteString -> Q Exp
+htmlToExpression byteString =
+  let fileContentsString = unpack $ decodeUtf8With lenientDecode byteString
+      fileContentsStringL = litE $ stringL fileContentsString
+  in appE [e|pure . (preEscapedToHtml :: String -> Html)|] fileContentsStringL
+
+-- | Remove a leading period from a string.
+--
+-- >>> removeLeadingPeriod ".jpg"
+-- "jpg"
+--
+-- Just return the 'String' if it doesn't start with a period:
+--
+-- >>> removeLeadingPeriod "hello"
+-- "hello"
+--
+-- Return an empty string if the only character in the string is a period:
+--
+-- >>> removeLeadingPeriod "."
+-- ""
+--
+-- Remove at most one period:
+--
+-- >>> removeLeadingPeriod "..bye"
+-- ".bye"
+removeLeadingPeriod :: String -> String
+removeLeadingPeriod ('.':chars) = chars
+removeLeadingPeriod string = string
+
+extensionToMimeTypeInfoEx :: FilePath -> Q MimeTypeInfo
+extensionToMimeTypeInfoEx file =
+  case extensionToMimeTypeInfo file of
+    Just mimeTypeInfo -> pure mimeTypeInfo
+    Nothing ->
+      let extension = getExtension file
+      in fail $
+        "Unknown extension type \"" <> extension <> "\".  Please report as bug."
+
+extensionToMimeTypeInfo :: FilePath -> Maybe MimeTypeInfo
+extensionToMimeTypeInfo file =
+  Map.lookup
+    (removeLeadingPeriod $ takeExtension file)
+    extensionMimeTypeMap
+
+-- | Return an extension for a 'FilePath'.  Just like 'takeExtension', but
+-- doesn't return the leading period.
+--
+-- >>> getExtension "/some/file.html"
+-- "html"
+--
+-- Empty string is returned for files with no extension:
+--
+-- >>> getExtension "file"
+-- ""
+getExtension :: FilePath -> FilePath
+getExtension = removeLeadingPeriod . takeExtension
+
+
 
 data JS deriving Typeable
 
@@ -135,10 +212,9 @@ singletonPromotedListT singleT =
 fileTreeToApiType :: FileTree -> Q Type
 fileTreeToApiType (FileTreeFile filePath _) = do
   addDependentFile filePath
-  let (mimeT, respT) = extensionToMimeType filePath
-      contentTypeT = singletonPromotedListT mimeT
-      respApiTypeT = appT (appT [t|Get|] contentTypeT) respT
-  servantNamedApiT (takeFileName filePath) respApiTypeT
+  MimeTypeInfo mimeT respT _ <- extensionToMimeTypeInfoEx filePath
+  let fileNameLit = litT $ strTyLit $ takeFileName filePath
+  [t|$(fileNameLit) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
   servantNamedApiManyT (takeFileName filePath) nonEmptyApiTypesQ
   where
@@ -147,8 +223,9 @@ fileTreeToApiType (FileTreeDir filePath fileTrees) =
 
 servantNamedApiT :: String -> Q Type -> Q Type
 servantNamedApiT name apiT =
-  let nameT = appT [t|(:>)|] . litT $ strTyLit name
-  in appT nameT apiT
+  -- let nameT = appT [t|(:>)|] . litT $ strTyLit name
+  -- in appT nameT apiT
+  [t|$(litT $ strTyLit name) :> $(apiT)|]
 
 servantNamedApiManyT :: String -> NonEmpty (Q Type) -> Q Type
 servantNamedApiManyT name apiTs =
