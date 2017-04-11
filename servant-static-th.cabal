@@ -1,6 +1,6 @@
 name:                servant-static-th
 version:             0.1.0.0
-synopsis:            Quasi-quoters for XML and HTML Documents
+synopsis:            Embed a directory of static files in your application and serve them from your Servant server
 description:         Please see <https://github.com/cdepillabout/servant-static-th#readme README.md>.
 homepage:            https://github.com/cdepillabout/servant-static-th
 license:             BSD3
@@ -17,6 +17,11 @@ library
   hs-source-dirs:      src
   exposed-modules:     Servant.Static.TH
                      , Servant.Static.TH.Internal
+                     , Servant.Static.TH.Internal.Api
+                     , Servant.Static.TH.Internal.FileTree
+                     , Servant.Static.TH.Internal.Mime
+                     , Servant.Static.TH.Internal.Server
+                     , Servant.Static.TH.Internal.Util
   build-depends:       base >= 4.8 && < 5
                      , blaze-html
                      , bytestring

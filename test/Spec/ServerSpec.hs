@@ -14,7 +14,7 @@ import Test.Hspec.Wai
 import Test.Tasty (TestTree)
 import Test.Tasty.Hspec (testSpec, it)
 
-import Servant.Static.TH.Internal (createApiAndServerDecs)
+import Servant.Static.TH (createApiAndServerDecs)
 
 import Spec.TestDirLocation (testDir)
 
