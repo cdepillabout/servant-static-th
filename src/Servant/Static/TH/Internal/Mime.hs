@@ -116,6 +116,7 @@ extensionToMimeTypeInfo file =
 
 data CSS deriving Typeable
 
+-- | @text/css@
 instance Accept CSS where
   contentType :: Proxy CSS -> MediaType
   contentType _ = "text" // "css"
@@ -128,6 +129,7 @@ instance MimeRender CSS ByteString where
 
 data GIF deriving Typeable
 
+-- | @image/gif@
 instance Accept GIF where
   contentType :: Proxy GIF -> MediaType
   contentType _ = "image" // "gif"
@@ -140,6 +142,7 @@ instance MimeRender GIF ByteString where
 
 data JPEG deriving Typeable
 
+-- | @image/jpeg@
 instance Accept JPEG where
   contentType :: Proxy JPEG -> MediaType
   contentType _ = "image" // "jpeg"
@@ -152,6 +155,7 @@ instance MimeRender JPEG ByteString where
 
 data JS deriving Typeable
 
+-- | @application/javascript@
 instance Accept JS where
   contentType :: Proxy JS -> MediaType
   contentType _ = "application" // "javascript"
@@ -164,6 +168,7 @@ instance MimeRender JS ByteString where
 
 data PNG deriving Typeable
 
+-- | @image/png@
 instance Accept PNG where
   contentType :: Proxy PNG -> MediaType
   contentType _ = "image" // "png"
@@ -176,6 +181,7 @@ instance MimeRender PNG ByteString where
 
 data SVG deriving Typeable
 
+-- | @image/svg@
 instance Accept SVG where
   contentType :: Proxy SVG -> MediaType
   contentType _ = "image" // "svg"
@@ -188,6 +194,7 @@ instance MimeRender SVG ByteString where
 
 data TXT deriving Typeable
 
+-- | @text/plain@
 instance Accept TXT where
   contentType :: Proxy TXT -> MediaType
   contentType _ = "text" // "plain"

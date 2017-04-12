@@ -1,4 +1,4 @@
-.PHONY: build clean dump-splices dump-th example ghci haddock haddock-server lint test upload watch watch-tests watch-test
+.PHONY: build clean dump-splices dump-th example ghci haddock haddock-server lint test upload watch watch-haddock watch-test
 all: build
 
 build:
@@ -53,8 +53,9 @@ upload:
 watch:
 	stack build --file-watch --fast .
 
-# Watch for changes.
-watch-test: watch-tests
-watch-tests: test/test-dir/empty-dir
+watch-haddock:
+	stack build --haddock --file-watch --fast .
+
+watch-test: test/test-dir/empty-dir
 	stack test --file-watch --fast .
 

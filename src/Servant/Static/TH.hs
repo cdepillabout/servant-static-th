@@ -8,7 +8,8 @@ module Servant.Static.TH
     -- * Create Both API and Server
   , createApiAndServerDecs
     -- * Mime Types
-    -- | If you need additional MIME types supported, feel free to create an
+    -- | The following types are the mime types supported by servant-static-th.
+    -- If you need additional MIME types supported, feel free to create an
     -- <https://github.com/cdepillabout/servant-static-th/issues issue> or
     -- <https://github.com/cdepillabout/servant-static-th/pulls PR>.
   , CSS
@@ -21,8 +22,11 @@ module Servant.Static.TH
   , SVG
   , TXT
     -- * Easy-To-Use Names and Paths
+
     -- | The functions in this section pick defaults for the api name and the
-    -- server function name. This makes it easy to use.
+    -- server function name. This makes it easy to use for quick-and-dirty
+    -- code.
+
     -- ** Paths and Names
   , frontEndTemplateDir
   , frontEndApiName
@@ -50,15 +54,15 @@ import Servant.Static.TH.Internal
 -- Hard-coded Frontend file paths --
 ------------------------------------
 
--- | This is the directory @frontend/dist@.
+-- | This is the directory @\"frontend/dist\"@.
 frontEndTemplateDir :: FilePath
 frontEndTemplateDir = "frontend" </> "dist"
 
--- | This is the 'String' @FrontEnd@.
+-- | This is the 'String' @\"FrontEnd\"@.
 frontEndApiName :: String
 frontEndApiName = "FrontEnd"
 
--- | This is the 'String' @frontEndServer@.
+-- | This is the 'String' @\"frontEndServer\"@.
 frontEndServerName :: String
 frontEndServerName = "frontEndServer"
 

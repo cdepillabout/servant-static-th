@@ -30,12 +30,43 @@ fileTreeToApiType (FileTreeDir filePath fileTrees) =
     nonEmptyApiTypesQ :: NonEmpty (Q Type)
     nonEmptyApiTypesQ = fmap fileTreeToApiType fileTrees
 
+-- | Given a list of @'Q' 'Type'@, combine them with Servant's '(:<|>)'
+-- function and return the resulting @'Q' 'Type'@.
 combineWithServantOrT :: NonEmpty (Q Type) -> Q Type
 combineWithServantOrT = foldl1 $ combineWithType [t|(:<|>)|]
 
 combineWithType :: Q Type -> Q Type -> Q Type -> Q Type
 combineWithType combiningType = appT . appT combiningType
 
+-- | Take a template directory argument as a 'FilePath' and create a Servant
+-- type representing the files in the directory.
+--
+-- For example, assume the following directory structure:
+--
+-- @
+--   $ tree \"dir\"
+--   dir/
+--   ├── js
+--   │   └── test.js
+--   └── index.html
+-- @
+--
+-- 'createApiType' is used like the following:
+--
+-- @
+--   {-\# LANGUAGE DataKinds \#-}
+--   {-\# LANGUAGE TemplateHaskell \#-}
+--
+--   type FrontEndAPI = $('createApiType' \"dir\")
+-- @
+--
+-- At compile time, it will expand to the following:
+--
+-- @
+--   type FrontEndAPI =
+--          \"js\" ':>' \"test.js\" ':>' 'Get' \'['JS'] 'ByteString'
+--     ':<|>' \"index.html\" ':>' 'Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
+-- @
 createApiType :: FilePath -> Q Type
 createApiType templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
