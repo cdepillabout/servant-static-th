@@ -44,7 +44,7 @@ combineWithType combiningType = appT . appT combiningType
 -- For example, assume the following directory structure:
 --
 -- @
---   $ tree \"dir\"
+--   $ tree dir/
 --   dir/
 --   ├── js
 --   │   └── test.js
@@ -67,11 +67,36 @@ combineWithType combiningType = appT . appT combiningType
 --          \"js\" ':>' \"test.js\" ':>' 'Get' \'['JS'] 'ByteString'
 --     ':<|>' \"index.html\" ':>' 'Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 -- @
-createApiType :: FilePath -> Q Type
+createApiType
+  :: FilePath -- ^ directory name to read files from
+  -> Q Type
 createApiType templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
   combineWithServantOrT $ fmap fileTreeToApiType fileTree
 
-createApiDec :: String -> FilePath -> Q [Dec]
+-- | This is the same as 'createApiType', but it creates the whole type
+-- synonym declaration.
+--
+-- Given the following code:
+--
+-- @
+--   {-\# LANGUAGE DataKinds \#-}
+--   {-\# LANGUAGE TemplateHaskell \#-}
+--
+--   $('createApiDec' "FrontAPI" \"dir\")
+-- @
+--
+-- You can think of it as expanding to the following:
+--
+-- @
+--   {-\# LANGUAGE DataKinds \#-}
+--   {-\# LANGUAGE TemplateHaskell \#-}
+--
+--   type FrontAPI = $('createApiType' \"dir\")
+-- @
+createApiDec
+  :: String   -- ^ name of the api type synonym
+  -> FilePath -- ^ directory name to read files from
+  -> Q [Dec]
 createApiDec apiName templateDir =
   pure <$> tySynD (mkName apiName) [] (createApiType templateDir)
