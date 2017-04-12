@@ -98,9 +98,9 @@ module Servant.Static.TH
   , createServerDec
     -- * Create Both API and Server
   , createApiAndServerDecs
-    -- * Mime Types
+    -- * MIME Types
 
-    -- | The following types are the mime types supported by servant-static-th.
+    -- | The following types are the MIME types supported by servant-static-th.
     -- If you need additional MIME types supported, feel free to create an
     -- <https://github.com/cdepillabout/servant-static-th/issues issue> or
     -- <https://github.com/cdepillabout/servant-static-th/pulls PR>.
