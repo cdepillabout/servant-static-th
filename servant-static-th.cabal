@@ -13,6 +13,10 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
+flag buildexample
+  description: Build a small example program
+  default: False
+
 library
   hs-source-dirs:      src
   exposed-modules:     Servant.Static.TH
@@ -39,6 +43,22 @@ library
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   other-extensions:    QuasiQuotes
                      , TemplateHaskell
+
+executable servant-static-th-example
+  main-is:             Example.hs
+  hs-source-dirs:      example
+  build-depends:       base
+                     , servant-server
+                     , servant-static-th
+                     , wai
+                     , warp
+  default-language:    Haskell2010
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+  if flag(buildexample)
+    buildable:         True
+  else
+    buildable:         False
 
 test-suite servant-static-th-doctest
   type:                exitcode-stdio-1.0

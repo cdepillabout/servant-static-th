@@ -1,9 +1,5 @@
-.PHONY: bench benchmark build build-haddock clean dump-splices dump-th ghci haddock haddock-server lint repl test upload watch watch-tests watch-test
+.PHONY: build clean dump-splices dump-th example ghci haddock haddock-server lint test upload watch watch-tests watch-test
 all: build
-
-bench: benchmark
-benchmark:
-	stack bench
 
 build:
 	stack build
@@ -21,21 +17,14 @@ dump-th:
 	@echo
 	@find "$$(stack path --dist-dir)" -name "*.dump-splices" | sort
 
-haddock: build-haddock
-build-haddock:
+example:
+	stack build --flag servant-static-th:buildexample
+	stack exec servant-static-th-example
+
+haddock:
 	stack build --haddock
 
-# Watch for changes.
-watch:
-	stack build --file-watch --fast .
-
-# Watch for changes.
-watch-test: watch-tests
-watch-tests: test/test-dir/empty-dir
-	stack test --file-watch --fast .
-
 # Run ghci using stack.
-repl: ghci
 ghci:
 	stack ghci
 
@@ -59,3 +48,13 @@ haddock-server:
 # Upload this package to hackage.
 upload:
 	stack upload .
+
+# Watch for changes.
+watch:
+	stack build --file-watch --fast .
+
+# Watch for changes.
+watch-test: watch-tests
+watch-tests: test/test-dir/empty-dir
+	stack test --file-watch --fast .
+
