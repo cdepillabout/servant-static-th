@@ -39,7 +39,8 @@ combineWithType :: Q Type -> Q Type -> Q Type -> Q Type
 combineWithType combiningType = appT . appT combiningType
 
 -- | Take a template directory argument as a 'FilePath' and create a Servant
--- type representing the files in the directory.
+-- type representing the files in the directory.  Empty directories will be
+-- ignored.
 --
 -- For example, assume the following directory structure:
 --
@@ -54,8 +55,8 @@ combineWithType combiningType = appT . appT combiningType
 -- 'createApiType' is used like the following:
 --
 -- @
---   {-\# LANGUAGE DataKinds \#-}
---   {-\# LANGUAGE TemplateHaskell \#-}
+--   \{\-\# LANGUAGE DataKinds \#\-\}
+--   \{\-\# LANGUAGE TemplateHaskell \#\-\}
 --
 --   type FrontEndAPI = $('createApiType' \"dir\")
 -- @
@@ -64,7 +65,7 @@ combineWithType combiningType = appT . appT combiningType
 --
 -- @
 --   type FrontEndAPI =
---          \"js\" ':>' \"test.js\" ':>' 'Get' \'['JS'] 'ByteString'
+--          \"js\" ':>' \"test.js\" ':>' 'Get' \'['JS'] 'Data.ByteString.ByteString'
 --     ':<|>' \"index.html\" ':>' 'Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 -- @
 createApiType
@@ -74,24 +75,21 @@ createApiType templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
   combineWithServantOrT $ fmap fileTreeToApiType fileTree
 
--- | This is the same as 'createApiType', but it creates the whole type
--- synonym declaration.
+-- | This is similar to 'createApiType', but it creates the whole type synonym
+-- declaration.
 --
 -- Given the following code:
 --
 -- @
---   {-\# LANGUAGE DataKinds \#-}
---   {-\# LANGUAGE TemplateHaskell \#-}
+--   \{\-\# LANGUAGE DataKinds \#\-\}
+--   \{\-\# LANGUAGE TemplateHaskell \#\-\}
 --
---   $('createApiDec' "FrontAPI" \"dir\")
+--   $('createApiDec' \"FrontAPI\" \"dir\")
 -- @
 --
 -- You can think of it as expanding to the following:
 --
 -- @
---   {-\# LANGUAGE DataKinds \#-}
---   {-\# LANGUAGE TemplateHaskell \#-}
---
 --   type FrontAPI = $('createApiType' \"dir\")
 -- @
 createApiDec

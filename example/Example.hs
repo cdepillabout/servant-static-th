@@ -12,7 +12,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 -- 'createApiAndServerDecs' will use the files in the directory @test/test-dir@
 -- to create two things.
 --
--- Lets assume that the @test/test-dir@ directory looks like this:
+-- Let's assume that the @test/test-dir@ directory looks like this:
 --
 -- @
 --   $ tree test/test-dir/
@@ -36,24 +36,27 @@ import Servant.Static.TH (createApiAndServerDecs)
 --
 -- Next, the following function will be created.  This function represents a
 -- Servant server for the @FrontEndApi@.  It basically just returns the content
--- from the files in the @test/test-dir@ directory:
+-- from the files in the @test/test-dir@ directory.  The contents from the files
+-- is statically embedded in the @frontEndServer@ function at compile fime:
 --
--- frontEndServer :: Applicative m => ServerT FrontEndApi m
--- frontEndServer = ...
+-- @
+--   frontEndServer :: Applicative m => ServerT FrontEndApi m
+--   frontEndServer = ...
+-- @
 --
 -- This @frontEndServer@ function can be passed to Servant's 'serve' function
 -- in order to create a WAI application.
 --
--- If this WAI application is running, it is possible to use @curl@ to access the
--- files.
+-- If this WAI application is running, it is possible to use @curl@ to access
+-- the server:
 --
 -- @
 --   $ curl localhost:8080/hello.html
 --   Hello World
 --   $ curl localhost:8080/dir/inner-file.html
 --   Inner File
---   $ curl localhost:8080/test.js
---   console.log("hello world");
+--   $ curl localhost:8080/dir/test.js
+--   console.log(\"hello world\");
 -- @
 
 $(createApiAndServerDecs "FrontEndApi" "frontEndServer" "test/test-dir")

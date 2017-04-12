@@ -31,9 +31,10 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
   combineWithServantOr $ fmap fileTreeToServer fileTrees
 
 -- | Take a template directory argument as a 'FilePath' and create a 'ServerT'
--- function that serves the files under the directory.
+-- function that serves the files under the directory.  Empty directories will
+-- be ignored.
 --
--- Note that the the file contents will be embedded in the function.  They will
+-- Note that the file contents will be embedded in the function.  They will
 -- not be served dynamically at runtime.  This makes it easy to create a
 -- Haskell binary for a website with all static files completely baked-in.
 --
@@ -57,8 +58,8 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
 -- 'createServerExp' is used like the following:
 --
 -- @
---   {-\# LANGUAGE DataKinds \#-}
---   {-\# LANGUAGE TemplateHaskell \#-}
+--   \{\-\# LANGUAGE DataKinds \#\-\}
+--   \{\-\# LANGUAGE TemplateHaskell \#\-\}
 --
 --   type FrontEndAPI = $('Servant.Static.TH.Internal.API.createApiType' \"dir\")
 --
@@ -79,12 +80,36 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
 --          'pure' "console.log(\\"hello world\\");"
 --     ':<|>' 'pure' "\<p\>Hello World\</p\>"
 -- @
-createServerExp :: FilePath -> Q Exp
+createServerExp
+  :: FilePath
+  -> Q Exp
 createServerExp templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
   combineWithServantOr $ fmap fileTreeToServer fileTree
 
-createServerDec :: String -> String -> FilePath -> Q [Dec]
+-- | This is similar to 'createServerExp', but it creates the whole function
+-- declaration.
+--
+-- Given the following code:
+--
+-- @
+--   \{\-\# LANGUAGE DataKinds \#\-\}
+--   \{\-\# LANGUAGE TemplateHaskell \#\-\}
+--
+--   $('createServerDec' \"FrontAPI\" \"frontServer\" \"dir\")
+-- @
+--
+-- You can think of it as expanding to the following:
+--
+-- @
+--   frontServer :: 'Applicative' m => 'ServerT' FrontAPI m
+--   frontServer = $('createServerExp' \"dir\")
+-- @
+createServerDec
+  :: String   -- ^ name of the api type synonym
+  -> String   -- ^ name of the server function
+  -> FilePath -- ^ directory name to read files from
+  -> Q [Dec]
 createServerDec apiName serverName templateDir =
   let funcName = mkName serverName
       sigTypeQ =
