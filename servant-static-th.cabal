@@ -1,5 +1,5 @@
 name:                servant-static-th
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Embed a directory of static files in your application and serve them from your Servant server
 description:         Please see <https://github.com/cdepillabout/servant-static-th#readme README.md>.
 homepage:            https://github.com/cdepillabout/servant-static-th
