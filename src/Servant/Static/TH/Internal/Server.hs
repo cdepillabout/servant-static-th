@@ -41,16 +41,16 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
 -- For example, assume the following directory structure and file contents:
 --
 -- @
---   $ tree dir/
---   dir/
+--   $ tree dir\/
+--   dir\/
 --   ├── js
 --   │   └── test.js
 --   └── index.html
 -- @
 --
 -- @
---   $ cat dir/index.html
---   \<p\>Hello World\</p\>
+--   $ cat dir\/index.html
+--   \<p\>Hello World\<\/p\>
 --   $ cat dir\/js\/test.js
 --   console.log(\"hello world\");
 -- @
@@ -78,7 +78,7 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
 --   frontEndServer :: 'Applicative' m => 'ServerT' FrontEndAPI m
 --   frontEndServer =
 --          'pure' "console.log(\\"hello world\\");"
---     ':<|>' 'pure' "\<p\>Hello World\</p\>"
+--     ':<|>' 'pure' "\<p\>Hello World\<\/p\>"
 -- @
 createServerExp
   :: FilePath

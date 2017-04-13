@@ -45,8 +45,8 @@ combineWithType combiningType = appT . appT combiningType
 -- For example, assume the following directory structure:
 --
 -- @
---   $ tree dir/
---   dir/
+--   $ tree dir\/
+--   dir\/
 --   ├── js
 --   │   └── test.js
 --   └── index.html

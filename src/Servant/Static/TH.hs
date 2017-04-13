@@ -18,18 +18,18 @@ Let's assume that we have a directory called @\"dir\"@ in the root of our
 Haskell web API that looks like this:
 
 @
-  $ tree dir/
-  dir/
+  $ tree dir\/
+  dir\/
   ├── js
   │   └── test.js
   └── hello.html
 @
 
-Here's the contents of @\"hello.html\"@ and @\"js/test.js\"@:
+Here's the contents of @\"hello.html\"@ and @\"js\/test.js\"@:
 
 @
-  $ cat dir/index.html
-  \<p\>Hello World\</p\>
+  $ cat dir\/index.html
+  \<p\>Hello World\<\/p\>
   $ cat dir\/js\/test.js
   console.log(\"hello world\");
 @
@@ -66,16 +66,16 @@ compile time:
   frontEndServer :: 'Applicative' m => 'Servant.Server.ServerT' FrontEndAPI m
   frontEndServer =
          'pure' "console.log(\\"hello world\\");"
-    ':<|>' 'pure' "\<p\>Hello World\</p\>"
+    ':<|>' 'pure' "\<p\>Hello World\<\/p\>"
 @
 
 If this WAI application is running, it is possible to use @curl@ to access
 the server:
 
 @
-  $ curl localhost:8080/hello.html
-  \<p\>Hello World\</p\>
-  $ curl localhost:8080/js/test.js
+  $ curl localhost:8080\/hello.html
+  \<p\>Hello World\<\/p\>
+  $ curl localhost:8080\/js\/test.js
   console.log(\"hello world\");
 @
 
@@ -146,7 +146,7 @@ import Servant.Static.TH.Internal
 -- Hard-coded Frontend file paths --
 ------------------------------------
 
--- | This is the directory @\"frontend/dist\"@.
+-- | This is the directory @\"frontend\/dist\"@.
 frontEndTemplateDir :: FilePath
 frontEndTemplateDir = "frontend" </> "dist"
 
