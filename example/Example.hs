@@ -9,14 +9,14 @@ import Network.Wai.Handler.Warp (run)
 import Servant.Server (serve)
 import Servant.Static.TH (createApiAndServerDecs)
 
--- 'createApiAndServerDecs' will use the files in the directory @test/test-dir@
+-- 'createApiAndServerDecs' will use the files in the directory @example/example-dir@
 -- to create two things.
 --
--- Let's assume that the @test/test-dir@ directory looks like this:
+-- Let's assume that the @example/example-dir@ directory looks like this:
 --
 -- @
---   $ tree test/test-dir/
---   test/test-dir/
+--   $ tree example/example-dir/
+--   example/example-dir/
 --   ├── dir
 --   │   ├── inner-file.html
 --   │   └── test.js
@@ -36,7 +36,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 --
 -- Next, the following function will be created.  This function represents a
 -- Servant server for the @FrontEndApi@.  It basically just returns the content
--- from the files in the @test/test-dir@ directory.  The contents from the files
+-- from the files in the @example/example-dir@ directory.  The contents from the files
 -- is statically embedded in the @frontEndServer@ function at compile fime:
 --
 -- @
@@ -59,7 +59,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 --   console.log(\"hello world\");
 -- @
 
-$(createApiAndServerDecs "FrontEndApi" "frontEndServer" "test/test-dir")
+$(createApiAndServerDecs "FrontEndApi" "frontEndServer" "example/example-dir")
 
 app :: Application
 app = serve (Proxy :: Proxy FrontEndApi) frontEndServer
