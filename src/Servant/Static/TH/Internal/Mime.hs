@@ -28,11 +28,11 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Monoid ((<>))
 import Data.Proxy (Proxy)
-import Data.Text (unpack)
-import Data.Text.Encoding (decodeUtf8With)
+import Data.Text (pack, unpack)
+import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Typeable (Typeable)
-import Language.Haskell.TH (Exp, Q, Type)
+import Language.Haskell.TH (Exp, Q, Type, appE, stringE, varE)
 import Network.HTTP.Media (MediaType, (//))
 import Servant.HTML.Blaze (HTML)
 import Servant.API (Accept(contentType), MimeRender(mimeRender))
@@ -68,6 +68,13 @@ byteStringToExp byteString =
   let word8List = ByteString.unpack byteString
   in [e|pure $ ByteString.pack word8List|]
 
+utf8ByteStringToExp :: ByteString -> Q Exp
+utf8ByteStringToExp byteString =
+  let stringExp = stringE . unpack $ decodeUtf8With lenientDecode byteString
+      packedExp = appE (varE 'pack) stringExp
+      byteStringExp = appE (varE 'encodeUtf8) packedExp
+  in appE (varE 'pure) byteStringExp
+
 htmlToExp :: ByteString -> Q Exp
 htmlToExp byteString =
   let fileContentsString = unpack $ decodeUtf8With lenientDecode byteString
@@ -83,7 +90,7 @@ extensionMimeTypeMap =
   , ("html", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExp)
   , ("jpeg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
   , ("jpg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
-  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] byteStringToExp)
+  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] utf8ByteStringToExp)
   , ("png", MimeTypeInfo [t|PNG|] [t|ByteString|] byteStringToExp)
   , ("txt", MimeTypeInfo [t|TXT|] [t|ByteString|] byteStringToExp)
   ]
