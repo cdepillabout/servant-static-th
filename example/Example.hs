@@ -19,7 +19,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 --   example/example-dir/
 --   ├── dir
 --   │   ├── inner-file.html
---   │   └── test.js
+--   │   └── example.js
 --   └── hello.html
 -- @
 --
@@ -29,7 +29,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 --   type FrontEndApi =
 --       "dir" :>
 --         ( "inner-file.html" :> Get '[HTML] Html :<|>
---           "test.js" :> Get '[JS] ByteString
+--           "example.js" :> Get '[JS] ByteString
 --         ) :<|>
 --       "hello.html" :> Get '[HTML] Html
 -- @
@@ -55,7 +55,7 @@ import Servant.Static.TH (createApiAndServerDecs)
 --   Hello World
 --   $ curl localhost:8080/dir/inner-file.html
 --   Inner File
---   $ curl localhost:8080/dir/test.js
+--   $ curl localhost:8080/dir/example.js
 --   console.log(\"hello world\");
 -- @
 
