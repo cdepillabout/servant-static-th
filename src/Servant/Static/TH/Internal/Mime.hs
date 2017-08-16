@@ -92,6 +92,7 @@ extensionMimeTypeMap =
   , ("jpg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
   , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] utf8ByteStringToExp)
   , ("png", MimeTypeInfo [t|PNG|] [t|ByteString|] byteStringToExp)
+  , ("svg", MimeTypeInfo [t|SVG|] [t|ByteString|] utf8ByteStringToExp)
   , ("txt", MimeTypeInfo [t|TXT|] [t|ByteString|] byteStringToExp)
   ]
 
@@ -191,7 +192,7 @@ data SVG deriving Typeable
 -- | @image\/svg@
 instance Accept SVG where
   contentType :: Proxy SVG -> MediaType
-  contentType _ = "image" // "svg"
+  contentType _ = "image" // "svg+xml"
 
 instance MimeRender SVG ByteString where
   mimeRender :: Proxy SVG -> ByteString -> LByteString.ByteString
