@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedLists #-}
@@ -22,7 +23,7 @@ types.
 module Servant.Static.TH.Internal.Mime where
 
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy as LByteString
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -32,7 +33,8 @@ import Data.Text (pack, unpack)
 import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Typeable (Typeable)
-import Language.Haskell.TH (Exp, Q, Type, appE, stringE, varE)
+import Language.Haskell.TH
+       (Exp(AppE, LitE, VarE), Lit(StringL), Q, Type, appE, stringE, varE)
 import Network.HTTP.Media (MediaType, (//))
 import Servant.HTML.Blaze (HTML)
 import Servant.API (Accept(contentType), MimeRender(mimeRender))
@@ -63,10 +65,14 @@ data MimeTypeInfo = MimeTypeInfo
     -- look at 'htmlToExp' and 'byteStringtoExp'.
   }
 
+stringToBs :: String -> ByteString
+stringToBs = B8.pack
+
 byteStringToExp :: ByteString -> Q Exp
-byteStringToExp byteString =
-  let word8List = ByteString.unpack byteString
-  in [e|pure $ ByteString.pack word8List|]
+byteStringToExp byteString = do
+  helper <- [| stringToBs |]
+  let !chars = B8.unpack byteString
+  pure $! AppE (VarE 'pure) $! AppE helper $! LitE $! StringL chars
 
 utf8ByteStringToExp :: ByteString -> Q Exp
 utf8ByteStringToExp byteString =
@@ -90,9 +96,9 @@ extensionMimeTypeMap =
   , ("html", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExp)
   , ("jpeg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
   , ("jpg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
-  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] utf8ByteStringToExp)
+  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] byteStringToExp)
   , ("png", MimeTypeInfo [t|PNG|] [t|ByteString|] byteStringToExp)
-  , ("svg", MimeTypeInfo [t|SVG|] [t|ByteString|] utf8ByteStringToExp)
+  , ("svg", MimeTypeInfo [t|SVG|] [t|ByteString|] byteStringToExp)
   , ("txt", MimeTypeInfo [t|TXT|] [t|ByteString|] byteStringToExp)
   ]
 
