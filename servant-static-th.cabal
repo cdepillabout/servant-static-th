@@ -1,5 +1,5 @@
 name:                servant-static-th
-version:             0.1.0.5
+version:             0.1.0.6
 synopsis:            Embed a directory of static files in your Servant server
 description:         Please see <https://github.com/cdepillabout/servant-static-th#readme README.md>.
 homepage:            https://github.com/cdepillabout/servant-static-th
@@ -10,7 +10,8 @@ maintainer:          cdep.illabout@gmail.com
 copyright:           2017 Dennis Gosnell
 category:            Text
 build-type:          Simple
-extra-source-files:  README.md
+extra-source-files:  CHANGELOG.md
+                   , README.md
                    , test/test-dir/dir/inner-file.html
                    , test/test-dir/dir/test.js
                    , test/test-dir/hello.html
