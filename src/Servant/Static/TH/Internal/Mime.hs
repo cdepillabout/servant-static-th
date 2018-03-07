@@ -96,10 +96,15 @@ extensionMimeTypeMap =
   , ("html", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExp)
   , ("jpeg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
   , ("jpg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
+  , ("ico", MimeTypeInfo [t|ICO|] [t|ByteString|] byteStringToExp)
   , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] byteStringToExp)
   , ("png", MimeTypeInfo [t|PNG|] [t|ByteString|] byteStringToExp)
   , ("svg", MimeTypeInfo [t|SVG|] [t|ByteString|] byteStringToExp)
   , ("txt", MimeTypeInfo [t|TXT|] [t|ByteString|] byteStringToExp)
+  , ("eot", MimeTypeInfo [t|EOT|] [t|ByteString|] byteStringToExp)
+  , ("ttf", MimeTypeInfo [t|TTF|] [t|ByteString|] byteStringToExp)
+  , ("woff", MimeTypeInfo [t|WOFF|] [t|ByteString|] byteStringToExp)
+  , ("woff2", MimeTypeInfo [t|WOFF2|] [t|ByteString|] byteStringToExp)
   ]
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
@@ -165,6 +170,19 @@ instance MimeRender JPEG ByteString where
   mimeRender :: Proxy JPEG -> ByteString -> LByteString.ByteString
   mimeRender _ = LByteString.fromStrict
 
+-- ICO
+
+data ICO deriving Typeable
+
+-- | @icon\/ico@
+instance Accept ICO where
+  contentType :: Proxy ICO -> MediaType
+  contentType _ = "image" // "x-icon"
+
+instance MimeRender ICO ByteString where
+  mimeRender :: Proxy ICO -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
 -- JS
 
 data JS deriving Typeable
@@ -216,3 +234,58 @@ instance Accept TXT where
 instance MimeRender TXT ByteString where
   mimeRender :: Proxy TXT -> ByteString -> LByteString.ByteString
   mimeRender _ = LByteString.fromStrict
+
+-- EOT
+
+data EOT deriving Typeable
+
+-- | @fonts\/eot@
+instance Accept EOT where
+  contentType :: Proxy EOT -> MediaType
+  contentType _ = "application" // "vnd.ms-fontobject"
+
+instance MimeRender EOT ByteString where
+  mimeRender :: Proxy EOT -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+-- TTF
+
+data TTF deriving Typeable
+
+-- | @fonts\/ttf@
+instance Accept TTF where
+  contentType :: Proxy TTF -> MediaType
+  contentType _ = "application" // "x-font-truetype"
+
+instance MimeRender TTF ByteString where
+  mimeRender :: Proxy TTF -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+-- WOFF
+
+data WOFF deriving Typeable
+
+-- | @fonts\/woff@
+instance Accept WOFF where
+  contentType :: Proxy WOFF -> MediaType
+  contentType _ = "font" // "woff"
+
+instance MimeRender WOFF ByteString where
+  mimeRender :: Proxy WOFF -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+-- WOFF2
+
+data WOFF2 deriving Typeable
+
+-- | @fonts\/woff2@
+instance Accept WOFF2 where
+  contentType :: Proxy WOFF2 -> MediaType
+  contentType _ = "font" // "woff2"
+
+instance MimeRender WOFF2 ByteString where
+  mimeRender :: Proxy WOFF2 -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+
+
