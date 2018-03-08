@@ -172,6 +172,7 @@ instance MimeRender JPEG ByteString where
 
 -- ICO
 
+-- | @since 0.2.0.0
 data ICO deriving Typeable
 
 -- | @icon\/ico@
@@ -237,6 +238,7 @@ instance MimeRender TXT ByteString where
 
 -- EOT
 
+-- | @since 0.2.0.0
 data EOT deriving Typeable
 
 -- | @fonts\/eot@
@@ -250,6 +252,7 @@ instance MimeRender EOT ByteString where
 
 -- TTF
 
+-- | @since 0.2.0.0
 data TTF deriving Typeable
 
 -- | @fonts\/ttf@
@@ -263,6 +266,7 @@ instance MimeRender TTF ByteString where
 
 -- WOFF
 
+-- | @since 0.2.0.0
 data WOFF deriving Typeable
 
 -- | @fonts\/woff@
@@ -276,6 +280,7 @@ instance MimeRender WOFF ByteString where
 
 -- WOFF2
 
+-- | @since 0.2.0.0
 data WOFF2 deriving Typeable
 
 -- | @fonts\/woff2@
@@ -286,6 +291,3 @@ instance Accept WOFF2 where
 instance MimeRender WOFF2 ByteString where
   mimeRender :: Proxy WOFF2 -> ByteString -> LByteString.ByteString
   mimeRender _ = LByteString.fromStrict
-
-
-
