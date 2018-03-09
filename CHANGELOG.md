@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.0.1
+
+-   In v0.2.0.0, the new MIME types were not being exported from `Servant.Static.TH`.  This fixes that.
+
 ## v0.2.0.0
 
 -   Add
