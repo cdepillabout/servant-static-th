@@ -105,14 +105,19 @@ module Servant.Static.TH
     -- <https://github.com/cdepillabout/servant-static-th/issues issue> or
     -- <https://github.com/cdepillabout/servant-static-th/pulls PR>.
   , CSS
+  , EOT
   , GIF
   , HTML
   , Html
+  , ICO
   , JPEG
   , JS
   , PNG
   , SVG
+  , TTF
   , TXT
+  , WOFF
+  , WOFF2
     -- * Easy-To-Use Names and Paths
 
     -- | The functions in this section pick defaults for the template
@@ -139,8 +144,23 @@ import Servant.HTML.Blaze (HTML)
 import Text.Blaze.Html (Html)
 
 import Servant.Static.TH.Internal
-       (CSS, GIF, JPEG, JS, PNG, SVG, TXT, createApiDec, createApiType,
-        createServerDec, createServerExp)
+  ( CSS
+  , EOT
+  , GIF
+  , ICO
+  , JPEG
+  , JS
+  , PNG
+  , SVG
+  , TTF
+  , TXT
+  , WOFF
+  , WOFF2
+  , createApiDec
+  , createApiType
+  , createServerDec
+  , createServerExp
+  )
 
 ------------------------------------
 -- Hard-coded Frontend file paths --
