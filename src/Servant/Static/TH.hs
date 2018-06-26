@@ -106,18 +106,21 @@ module Servant.Static.TH
     -- <https://github.com/cdepillabout/servant-static-th/pulls PR>.
   , CSS
   , EOT
+  , GEXF
   , GIF
   , HTML
   , Html
   , ICO
   , JPEG
   , JS
+  , JSON
   , PNG
   , SVG
   , TTF
   , TXT
   , WOFF
   , WOFF2
+  , XML
     -- * Easy-To-Use Names and Paths
 
     -- | The functions in this section pick defaults for the template
@@ -146,9 +149,11 @@ import Text.Blaze.Html (Html)
 import Servant.Static.TH.Internal
   ( CSS
   , EOT
+  , GEXF
   , GIF
   , ICO
   , JPEG
+  , JSON
   , JS
   , PNG
   , SVG
@@ -156,6 +161,7 @@ import Servant.Static.TH.Internal
   , TXT
   , WOFF
   , WOFF2
+  , XML
   , createApiDec
   , createApiType
   , createServerDec
