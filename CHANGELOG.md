@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1.0
+
+-   This adds MIME types for json, xml, gex.  Thanks [delanoe](https://github.com/delanoe)!  [#5](https://github.com/cdepillabout/servant-static-th/pull/5)
+
 ## v0.2.0.1
 
 -   In v0.2.0.0, the new MIME types were not being exported from `Servant.Static.TH`.  This fixes that.
