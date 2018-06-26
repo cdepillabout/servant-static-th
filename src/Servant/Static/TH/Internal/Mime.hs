@@ -90,21 +90,24 @@ htmlToExp byteString =
 -- that extension.
 extensionMimeTypeMap :: Map String MimeTypeInfo
 extensionMimeTypeMap =
-  [ ("css", MimeTypeInfo [t|CSS|] [t|ByteString|] byteStringToExp)
-  , ("gif", MimeTypeInfo [t|GIF|] [t|ByteString|] byteStringToExp)
-  , ("htm", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExp)
-  , ("html", MimeTypeInfo [t|HTML|] [t|Html|] htmlToExp)
+  [ ("css",  MimeTypeInfo [t|CSS|]  [t|ByteString|] byteStringToExp)
+  , ("gif",  MimeTypeInfo [t|GIF|]  [t|ByteString|] byteStringToExp)
+  , ("htm",  MimeTypeInfo [t|HTML|] [t|Html|]             htmlToExp)
+  , ("html", MimeTypeInfo [t|HTML|] [t|Html|]             htmlToExp)
   , ("jpeg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
-  , ("jpg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
-  , ("ico", MimeTypeInfo [t|ICO|] [t|ByteString|] byteStringToExp)
-  , ("js", MimeTypeInfo [t|JS|] [t|ByteString|] byteStringToExp)
-  , ("png", MimeTypeInfo [t|PNG|] [t|ByteString|] byteStringToExp)
-  , ("svg", MimeTypeInfo [t|SVG|] [t|ByteString|] byteStringToExp)
-  , ("txt", MimeTypeInfo [t|TXT|] [t|ByteString|] byteStringToExp)
-  , ("eot", MimeTypeInfo [t|EOT|] [t|ByteString|] byteStringToExp)
-  , ("ttf", MimeTypeInfo [t|TTF|] [t|ByteString|] byteStringToExp)
+  , ("jpg",  MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
+  , ("ico",  MimeTypeInfo [t|ICO|]  [t|ByteString|] byteStringToExp)
+  , ("js",   MimeTypeInfo [t|JS|]   [t|ByteString|] byteStringToExp)
+  , ("png",  MimeTypeInfo [t|PNG|]  [t|ByteString|] byteStringToExp)
+  , ("svg",  MimeTypeInfo [t|SVG|]  [t|ByteString|] byteStringToExp)
+  , ("txt",  MimeTypeInfo [t|TXT|]  [t|ByteString|] byteStringToExp)
+  , ("eot",  MimeTypeInfo [t|EOT|]  [t|ByteString|] byteStringToExp)
+  , ("ttf",  MimeTypeInfo [t|TTF|]  [t|ByteString|] byteStringToExp)
   , ("woff", MimeTypeInfo [t|WOFF|] [t|ByteString|] byteStringToExp)
-  , ("woff2", MimeTypeInfo [t|WOFF2|] [t|ByteString|] byteStringToExp)
+  , ("woff2",MimeTypeInfo [t|WOFF2|][t|ByteString|] byteStringToExp)
+  , ("json", MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
+  , ("xml",  MimeTypeInfo [t|XML|]  [t|ByteString|] byteStringToExp)
+  , ("gexf", MimeTypeInfo [t|GEXF|] [t|ByteString|] byteStringToExp)
   ]
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
@@ -169,6 +172,8 @@ instance Accept JPEG where
 instance MimeRender JPEG ByteString where
   mimeRender :: Proxy JPEG -> ByteString -> LByteString.ByteString
   mimeRender _ = LByteString.fromStrict
+
+
 
 -- ICO
 
@@ -291,3 +296,44 @@ instance Accept WOFF2 where
 instance MimeRender WOFF2 ByteString where
   mimeRender :: Proxy WOFF2 -> ByteString -> LByteString.ByteString
   mimeRender _ = LByteString.fromStrict
+
+
+-- | JSON file
+data JSON deriving Typeable
+
+-- | @application\/json@
+instance Accept JSON where
+  contentType :: Proxy JSON -> MediaType
+  contentType _ = "application" // "json"
+
+instance MimeRender JSON ByteString where
+  mimeRender :: Proxy JSON -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+
+-- | XML file
+data XML deriving Typeable
+
+-- | @application\/xml@
+instance Accept XML where
+  contentType :: Proxy XML -> MediaType
+  contentType _ = "application" // "xml"
+
+instance MimeRender XML ByteString where
+  mimeRender :: Proxy XML -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+
+-- | GEXF file (xml for graph application)
+data GEXF deriving Typeable
+
+-- | @application\/gexf@
+instance Accept GEXF where
+  contentType :: Proxy GEXF -> MediaType
+  contentType _ = "application" // "gexf"
+
+instance MimeRender GEXF ByteString where
+  mimeRender :: Proxy GEXF -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
+
+
