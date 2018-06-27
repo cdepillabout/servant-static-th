@@ -1,8 +1,12 @@
 # Changelog
 
-## v0.2.1.0
+## v0.2.2.0
 
 -   This adds MIME types for json, xml, gex.  Thanks [delanoe](https://github.com/delanoe)!  [#5](https://github.com/cdepillabout/servant-static-th/pull/5)
+
+## v0.2.1.0
+
+-   This was mistakenly released to Hackage without exposing the constructors added in [#5](https://github.com/cdepillabout/servant-static-th/pull/5)).  It has been blacklisted on Hackage.
 
 ## v0.2.0.1
 
