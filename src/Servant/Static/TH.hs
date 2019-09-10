@@ -89,10 +89,11 @@ This shouldn't be used for high-traffic websites.  Instead, you should serve
 your static files from something like Apache, nginx, or a CDN.
 
 Note:
-If you are creating a 'cabal' package that needs to work with 'cabal-install', 
-the @\"dir\"@ you want to serve needs to be a relative path inside your 
-project root, and all contained files need to be listed in your 
-'.cabal'-file under the 'extra-source-files' field so that they are 
+
+If you are creating a @cabal@ package that needs to work with @cabal-install@,
+the @\"dir\"@ you want to serve needs to be a relative path inside your
+project root, and all contained files need to be listed in your
+@.cabal@-file under the @extra-source-files@ field so that they are
 included and available at compile-time.
 -}
 
