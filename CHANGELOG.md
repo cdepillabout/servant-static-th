@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2.1
+
+-   Update haddocks with a note to use `extra-source-files` in your `.cabal`
+    file.  Thanks [fkellner](https://github.com/fkellner)! [#8](https://github.com/cdepillabout/servant-static-th/pull/8)
+
 ## v0.2.2.0
 
 -   This adds MIME types for json, xml, gex.  Thanks [delanoe](https://github.com/delanoe)!  [#5](https://github.com/cdepillabout/servant-static-th/pull/5)
