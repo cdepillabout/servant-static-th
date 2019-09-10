@@ -5,7 +5,7 @@ resolver: lts-14.4
 
 # Local packages, usually specified by relative directory name
 packages:
-- '.'
+  - '.'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []
@@ -39,3 +39,6 @@ extra-package-dbs: []
 # This has been disabled because of the following exchange:
 # https://github.com/cdepillabout/pretty-simple/pull/1#issuecomment-272706215
 #pvp-bounds: both
+
+nix:
+  packages: [zlib]
