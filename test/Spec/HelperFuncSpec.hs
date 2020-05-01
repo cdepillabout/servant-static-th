@@ -6,6 +6,7 @@
 
 module Spec.HelperFuncSpec where
 
+import qualified Data.ByteString as ByteString
 import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit ((@?=), testCase)
@@ -15,6 +16,7 @@ import Servant.Static.TH.Internal
 
 import Spec.TastyHelpers ((@!), anyException)
 import Spec.TestDirLocation (testDir)
+import Control.Monad.IO.Class (liftIO)
 
 helperFuncTests :: TestTree
 helperFuncTests =
@@ -45,6 +47,9 @@ getFileTreeIgnoreEmptyTests =
     "getFileTreeIgnoreEmpty"
     [ testCase "correctly gets file tree" $ do
         actualFileTree <- getFileTreeIgnoreEmpty testDir
+        gzippedJS   <- liftIO . ByteString.readFile $ testDir </> "dir" </> "test-gzipped.js.gz"
+        brotliJS    <- liftIO . ByteString.readFile $ testDir </> "dir" </> "test-brotli.js.br"
+        gzippedHTML <- liftIO . ByteString.readFile $ testDir </> "hello-compressed.html.gz"
         let expectedFileTree =
               [ FileTreeDir
                   (testDir </> "dir")
@@ -52,9 +57,18 @@ getFileTreeIgnoreEmptyTests =
                       (testDir </> "dir" </> "inner-file.html")
                       "Inner File\n"
                   , FileTreeFile
+                      (testDir </> "dir" </> "test-brotli.js.br")
+                      brotliJS
+                  , FileTreeFile
+                      (testDir </> "dir" </> "test-gzipped.js.gz")
+                      gzippedJS
+                  , FileTreeFile
                       (testDir </> "dir" </> "test.js")
                       "console.log(\"hello world\");\n"
                   ]
+              , FileTreeFile
+                  (testDir </> "hello-compressed.html.gz")
+                  gzippedHTML
               , FileTreeFile
                   (testDir </> "hello.html")
                   "Hello World\n"

@@ -35,14 +35,16 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Data.Typeable (Typeable)
 import Language.Haskell.TH
        (Exp(AppE, LitE, VarE), Lit(StringL), Q, Type, appE, stringE, varE)
-import Network.HTTP.Media (MediaType, (//))
+import Network.HTTP.Media (MediaType, (//), (/:))
 import Servant.HTML.Blaze (HTML)
 import Servant.API (Accept(contentType), MimeRender(mimeRender))
-import System.FilePath (takeExtension)
+import System.FilePath (takeExtension, dropExtension)
 import Text.Blaze.Html (Html, preEscapedToHtml)
 
 import Servant.Static.TH.Internal.Util
        (getExtension, removeLeadingPeriod)
+import Servant.Static.TH.Internal.CompressedData
+       (CompressionType(..), addCompressionHeader, fromExt)
 
 -- | Hold 'Type's and functions work working with a given file type, like
 -- @html@ or @js@.
@@ -60,19 +62,30 @@ data MimeTypeInfo = MimeTypeInfo
     -- Servant API.  For instance, HTML files will use something like
     -- @[t|'Html'|]@, while JavascriptFiles will use something like
     -- @[t|'ByteString'|]@.
-  , mimeTypeInfoToExpression :: ByteString -> Q Exp
+  , mimeTypeInfoToExpression :: CompressionType -> ByteString -> Q Exp
     -- ^ A function that turns a 'ByteString' into an 'Exp'.  For an example,
     -- look at 'htmlToExp' and 'byteStringtoExp'.
   }
 
+-- | A simple wrapper around 'MimeTypeInfo' that carries a decision of applying a Content-Encoding header on a handler
+data HandlerInfo = HandlerInfo {
+    mime        :: MimeTypeInfo
+  , compression :: CompressionType
+  , filePath    :: FilePath
+  }
+
+
 stringToBs :: String -> ByteString
 stringToBs = B8.pack
 
-byteStringToExp :: ByteString -> Q Exp
-byteStringToExp byteString = do
+byteStringToExp :: CompressionType
+                -> ByteString
+                -> Q Exp
+byteStringToExp comp byteString = do
   helper <- [| stringToBs |]
+  compr  <- [| addCompressionHeader comp |]
   let !chars = B8.unpack byteString
-  pure $! AppE (VarE 'pure) $! AppE helper $! LitE $! StringL chars
+  pure $! AppE (VarE 'pure) $! AppE compr $! AppE helper $! LitE $! StringL chars
 
 utf8ByteStringToExp :: ByteString -> Q Exp
 utf8ByteStringToExp byteString =
@@ -81,10 +94,10 @@ utf8ByteStringToExp byteString =
       byteStringExp = appE (varE 'encodeUtf8) packedExp
   in appE (varE 'pure) byteStringExp
 
-htmlToExp :: ByteString -> Q Exp
-htmlToExp byteString =
+htmlToExp :: CompressionType -> ByteString -> Q Exp
+htmlToExp comp byteString =
   let fileContentsString = unpack $ decodeUtf8With lenientDecode byteString
-  in [e|pure $ (preEscapedToHtml :: String -> Html) fileContentsString|]
+  in  [e|pure $ addCompressionHeader comp $ (preEscapedToHtml :: String -> Html) fileContentsString|]
 
 -- | A mapping from an extension like @html@ or @js@ to a 'MimeTypeInfo' for
 -- that extension.
@@ -114,10 +127,10 @@ extensionMimeTypeMap =
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
 -- the extension for the given 'FilePath' is not found.
-extensionToMimeTypeInfoEx :: FilePath -> Q MimeTypeInfo
+extensionToMimeTypeInfoEx :: FilePath -> Q HandlerInfo
 extensionToMimeTypeInfoEx file =
   case extensionToMimeTypeInfo file of
-    Just mimeTypeInfo -> pure mimeTypeInfo
+    Just handlerInfo -> pure handlerInfo
     Nothing ->
       let extension = getExtension file
       in fail $
@@ -126,15 +139,60 @@ extensionToMimeTypeInfoEx file =
 -- | Lookup the 'MimeTypeInfo' for a given 'FilePath' (that has an extension
 -- like @.html@ or @.js@).  Returns 'Nothing' if the 'MimeTypeInfo' for the
 -- given extension is not found.
-extensionToMimeTypeInfo :: FilePath -> Maybe MimeTypeInfo
+extensionToMimeTypeInfo :: FilePath -> Maybe HandlerInfo
 extensionToMimeTypeInfo file =
-  Map.lookup
-    (removeLeadingPeriod $ takeExtension file)
-    extensionMimeTypeMap
+  case Map.lookup fileExt extensionMimeTypeMap of
+    Just mimeInfo -> Just $ negotiateMimeAndResponseType mimeInfo compr fileVirtualPath
+    Nothing -> Nothing
+  where
+    (fileExt, fileVirtualPath, compr) = decideRealFileExtension file
+
+type FileExtension = String
+type VirtualPath = FilePath
+
+decideRealFileExtension :: FilePath
+                        -> (FileExtension, VirtualPath, CompressionType)
+decideRealFileExtension realFilePath =
+  case comp of
+    Identity -> (outermostExt, realFilePath, comp)
+    _        -> (removeLeadingPeriod (takeExtension virtPath), virtPath, comp)
+                where virtPath = dropExtension realFilePath
+  where
+    comp         = fromExt outermostExt
+    outermostExt = removeLeadingPeriod $ takeExtension realFilePath
+
+negotiateMimeAndResponseType :: MimeTypeInfo
+                             -> CompressionType
+                             -> FilePath
+                             -> HandlerInfo
+negotiateMimeAndResponseType (MimeTypeInfo mime responseT toExprFun) compr virtualPath =
+  HandlerInfo finalMimeInfo compr virtualPath
+  where
+  finalMimeInfo = case compr of
+    Identity -> MimeTypeInfo mime responseT toExprFun
+    _ ->
+      case takeExtension virtualPath of
+        ".html" -> MimeTypeInfo [t|CompressedHTML|] [t|ByteString|] byteStringToExp
+        ".htm"  -> MimeTypeInfo [t|CompressedHTML|] [t|ByteString|] byteStringToExp
+        _       -> MimeTypeInfo mime responseT byteStringToExp
 
 -------------------------
 -- Supported MimeTypes --
 -------------------------
+
+-- HTML for compressed pages
+
+-- | Use it as MimeType for routes that serve compressed html
+data CompressedHTML deriving Typeable
+
+-- | @text/html;charset=utf-8@ for 'EncodingAwareResponse'
+instance Accept CompressedHTML where
+  contentType :: Proxy CompressedHTML -> MediaType
+  contentType _ = "text" // "html" /: ("charset", "utf-8")
+
+instance MimeRender CompressedHTML ByteString where
+  mimeRender :: Proxy CompressedHTML -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
 
 -- CSS
 

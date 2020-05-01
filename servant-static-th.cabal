@@ -14,7 +14,10 @@ extra-source-files:  CHANGELOG.md
                    , README.md
                    , test/test-dir/dir/inner-file.html
                    , test/test-dir/dir/test.js
+                   , test/test-dir/dir/test-gzipped.js.gz
+                   , test/test-dir/dir/test-brotli.js.br
                    , test/test-dir/hello.html
+                   , test/test-dir/hello-compressed.html.gz
 cabal-version:       >=1.10
 
 flag buildexample
@@ -28,6 +31,7 @@ library
                      , Servant.Static.TH.Internal.Api
                      , Servant.Static.TH.Internal.FileTree
                      , Servant.Static.TH.Internal.Mime
+                     , Servant.Static.TH.Internal.CompressedData
                      , Servant.Static.TH.Internal.Server
                      , Servant.Static.TH.Internal.Util
   build-depends:       base >= 4.8 && < 5
@@ -37,6 +41,7 @@ library
                      , directory >= 1.2.5.0
                      , filepath
                      , http-media
+                     , hashtables
                      , semigroups
                      , servant >= 0.8
                      , servant-blaze >= 0.7
@@ -98,7 +103,7 @@ test-suite servant-static-th-test
                      , servant-server
                      , wai
   default-language:    Haskell2010
-  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
+  ghc-options:         -ddump-splices -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
 
 source-repository head
   type:     git

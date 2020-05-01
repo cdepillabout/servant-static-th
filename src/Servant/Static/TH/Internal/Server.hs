@@ -25,8 +25,8 @@ combineWithServantOr = foldl1 $ combineWithExp [e|(:<|>)|]
 fileTreeToServer :: FileTree -> Q Exp
 fileTreeToServer (FileTreeFile filePath fileContents) = do
   addDependentFile filePath
-  MimeTypeInfo _ _ contentToExp <- extensionToMimeTypeInfoEx filePath
-  contentToExp fileContents
+  HandlerInfo (MimeTypeInfo _ _ contentToExp) comp _ <- extensionToMimeTypeInfoEx filePath
+  contentToExp comp fileContents
 fileTreeToServer (FileTreeDir _ fileTrees) =
   combineWithServantOr $ fmap fileTreeToServer fileTrees
 
