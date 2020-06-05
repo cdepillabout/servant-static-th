@@ -108,6 +108,7 @@ extensionMimeTypeMap =
   , ("json", MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
   , ("xml",  MimeTypeInfo [t|XML|]  [t|ByteString|] byteStringToExp)
   , ("gexf", MimeTypeInfo [t|GEXF|] [t|ByteString|] byteStringToExp)
+  , ("map",  MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
   ]
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
