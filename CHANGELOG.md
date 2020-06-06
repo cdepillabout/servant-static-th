@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3.0
+
+-   Add a mime type for .map files
+    [#15](https://github.com/cdepillabout/servant-static-th/pull/15). Thanks
+    [@spencertipping](https://github.com/spencertipping)!
+
 ## v0.2.2.1
 
 -   Update haddocks with a note to use `extra-source-files` in your `.cabal`
