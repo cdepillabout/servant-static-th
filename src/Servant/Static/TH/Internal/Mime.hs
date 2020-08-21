@@ -109,6 +109,7 @@ extensionMimeTypeMap =
   , ("xml",  MimeTypeInfo [t|XML|]  [t|ByteString|] byteStringToExp)
   , ("gexf", MimeTypeInfo [t|GEXF|] [t|ByteString|] byteStringToExp)
   , ("map",  MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
+  , ("wasm", MimeTypeInfo [t|WASM|] [t|ByteString|] byteStringToExp)
   ]
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
@@ -338,3 +339,14 @@ instance MimeRender GEXF ByteString where
   mimeRender _ = LByteString.fromStrict
 
 
+-- | WASM file (WebAssembly bytecode)
+data WASM deriving Typeable
+
+-- | @application\/wasm@
+instance Accept WASM where
+  contentType :: Proxy WASM -> MediaType
+  contentType _ = "application" // "wasm"
+
+instance MimeRender WASM ByteString where
+  mimeRender :: Proxy WASM -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
