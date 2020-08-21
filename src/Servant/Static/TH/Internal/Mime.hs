@@ -91,25 +91,25 @@ htmlToExp byteString =
 extensionMimeTypeMap :: Map String MimeTypeInfo
 extensionMimeTypeMap =
   [ ("css",  MimeTypeInfo [t|CSS|]  [t|ByteString|] byteStringToExp)
+  , ("eot",  MimeTypeInfo [t|EOT|]  [t|ByteString|] byteStringToExp)
+  , ("gexf", MimeTypeInfo [t|GEXF|] [t|ByteString|] byteStringToExp)
   , ("gif",  MimeTypeInfo [t|GIF|]  [t|ByteString|] byteStringToExp)
   , ("htm",  MimeTypeInfo [t|HTML|] [t|Html|]             htmlToExp)
   , ("html", MimeTypeInfo [t|HTML|] [t|Html|]             htmlToExp)
+  , ("ico",  MimeTypeInfo [t|ICO|]  [t|ByteString|] byteStringToExp)
   , ("jpeg", MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
   , ("jpg",  MimeTypeInfo [t|JPEG|] [t|ByteString|] byteStringToExp)
-  , ("ico",  MimeTypeInfo [t|ICO|]  [t|ByteString|] byteStringToExp)
   , ("js",   MimeTypeInfo [t|JS|]   [t|ByteString|] byteStringToExp)
+  , ("json", MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
+  , ("map",  MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
   , ("png",  MimeTypeInfo [t|PNG|]  [t|ByteString|] byteStringToExp)
   , ("svg",  MimeTypeInfo [t|SVG|]  [t|ByteString|] byteStringToExp)
-  , ("txt",  MimeTypeInfo [t|TXT|]  [t|ByteString|] byteStringToExp)
-  , ("eot",  MimeTypeInfo [t|EOT|]  [t|ByteString|] byteStringToExp)
   , ("ttf",  MimeTypeInfo [t|TTF|]  [t|ByteString|] byteStringToExp)
+  , ("txt",  MimeTypeInfo [t|TXT|]  [t|ByteString|] byteStringToExp)
+  , ("wasm", MimeTypeInfo [t|WASM|] [t|ByteString|] byteStringToExp)
   , ("woff", MimeTypeInfo [t|WOFF|] [t|ByteString|] byteStringToExp)
   , ("woff2",MimeTypeInfo [t|WOFF2|][t|ByteString|] byteStringToExp)
-  , ("json", MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
   , ("xml",  MimeTypeInfo [t|XML|]  [t|ByteString|] byteStringToExp)
-  , ("gexf", MimeTypeInfo [t|GEXF|] [t|ByteString|] byteStringToExp)
-  , ("map",  MimeTypeInfo [t|JSON|] [t|ByteString|] byteStringToExp)
-  , ("wasm", MimeTypeInfo [t|WASM|] [t|ByteString|] byteStringToExp)
   ]
 
 -- | Just like 'extensionToMimeTypeInfo', but throw an error using 'fail' if
