@@ -11,10 +11,14 @@ jobs:
     name: ${{ matrix.os }} / ghc ${{ matrix.ghc }}
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2
+      # Cancels all in-progress jobs if any matrix job fails.
+      fail-fast: true  # This is actually the default value.
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        cabal: ["latest"]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+        cabal:
+          - "latest"
         ghc:
           - "8.6.5"
           - "8.8.4"
