@@ -106,6 +106,7 @@ extensionMimeTypeMap =
   , ("svg",  MimeTypeInfo [t|SVG|]  [t|ByteString|] byteStringToExp)
   , ("ttf",  MimeTypeInfo [t|TTF|]  [t|ByteString|] byteStringToExp)
   , ("txt",  MimeTypeInfo [t|TXT|]  [t|ByteString|] byteStringToExp)
+  , ("wasm", MimeTypeInfo [t|WASM|] [t|ByteString|] byteStringToExp)
   , ("woff", MimeTypeInfo [t|WOFF|] [t|ByteString|] byteStringToExp)
   , ("woff2",MimeTypeInfo [t|WOFF2|][t|ByteString|] byteStringToExp)
   , ("xml",  MimeTypeInfo [t|XML|]  [t|ByteString|] byteStringToExp)
@@ -338,3 +339,14 @@ instance MimeRender GEXF ByteString where
   mimeRender _ = LByteString.fromStrict
 
 
+-- | WASM file (WebAssembly bytecode)
+data WASM deriving Typeable
+
+-- | @application\/wasm@
+instance Accept WASM where
+  contentType :: Proxy WASM -> MediaType
+  contentType _ = "application" // "wasm"
+
+instance MimeRender WASM ByteString where
+  mimeRender :: Proxy WASM -> ByteString -> LByteString.ByteString
+  mimeRender _ = LByteString.fromStrict
