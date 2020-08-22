@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4.0
+
+-   Add a mime type for .wasm files
+    [#17](https://github.com/cdepillabout/servant-static-th/pull/17).
+    Thanks again [@spencertipping](https://github.com/spencertipping)!
+
 ## v0.2.3.0
 
 -   Add a mime type for .map files
