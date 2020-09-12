@@ -5,7 +5,7 @@
 
 module Servant.Static.TH.Internal.Api where
 
-import Data.Foldable (foldl1)
+import qualified Data.HashTable.IO as H
 import Data.List.NonEmpty (NonEmpty)
 import Language.Haskell.TH
        (Dec, Q, Type, appT, litT, mkName,
@@ -16,19 +16,35 @@ import System.FilePath (takeFileName)
 
 import Servant.Static.TH.Internal.FileTree
 import Servant.Static.TH.Internal.Mime
+import Servant.Static.TH.Internal.CompressedData (EncodingAwareResponse)
 
-fileTreeToApiType :: FileTree -> Q Type
-fileTreeToApiType (FileTreeFile filePath _) = do
-  addDependentFile filePath
-  MimeTypeInfo mimeT respT _ <- extensionToMimeTypeInfoEx filePath
-  let fileNameLitT = litT $ strTyLit $ takeFileName filePath
-  [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
-fileTreeToApiType (FileTreeDir filePath fileTrees) =
+type FileInFilesystem  = FilePath
+type CollisionRegistry = H.BasicHashTable VirtualPath FileInFilesystem
+
+fileTreeToApiType :: CollisionRegistry
+                  -> FileTree
+                  -> Q Type
+fileTreeToApiType reg (FileTreeFile filePath _) = do
+  HandlerInfo (MimeTypeInfo mimeT respT _) comp virtualPath <- extensionToMimeTypeInfoEx filePath
+  maybeCollision <- runIO $ H.lookup reg virtualPath
+  case maybeCollision of
+    Just x  -> fail (
+      "Ambiguous data source for a URL was found: \n\t* "
+        <> "URL: "  <> show virtualPath <> " -> "
+        <> "File: " <> show filePath    <> " or " <> show x <>
+        "\nYou need to remove either of the files, or to move one of them to other directory."
+      )
+    Nothing -> do
+      runIO $ H.insert reg virtualPath filePath
+      addDependentFile filePath
+      let fileNameLitT = litT $ strTyLit $ takeFileName virtualPath
+      [t|$(fileNameLitT) :> Get '[$(mimeT)] (EncodingAwareResponse $(respT))|]
+fileTreeToApiType reg (FileTreeDir filePath fileTrees) =
   let fileNameLitT = litT $ strTyLit $ takeFileName filePath
   in [t|$(fileNameLitT) :> $(combineWithServantOrT nonEmptyApiTypesQ)|]
   where
     nonEmptyApiTypesQ :: NonEmpty (Q Type)
-    nonEmptyApiTypesQ = fmap fileTreeToApiType fileTrees
+    nonEmptyApiTypesQ = fmap (fileTreeToApiType reg) fileTrees
 
 -- | Given a list of @'Q' 'Type'@, combine them with Servant's '(:<|>)'
 -- function and return the resulting @'Q' 'Type'@.
@@ -73,7 +89,8 @@ createApiType
   -> Q Type
 createApiType templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
-  combineWithServantOrT $ fmap fileTreeToApiType fileTree
+  reg <- runIO $ H.new
+  combineWithServantOrT $ fmap (fileTreeToApiType reg) fileTree
 
 -- | This is similar to 'createApiType', but it creates the whole type synonym
 -- declaration.
