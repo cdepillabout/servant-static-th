@@ -19,7 +19,7 @@ import Spec.TestDirLocation (testDir)
 $(createApiDec "FrontEndApi" testDir)
 
 type ExpectedFrontEndApi =
-    (
+    ((
       "dir" :>
         (
           ( "inner-file.html" :> Get '[HTML] Html )
@@ -28,7 +28,9 @@ type ExpectedFrontEndApi =
         )
     )
   :<|>
-    ( "hello.html" :> Get '[HTML] Html )
+    ( "hello.html" :> Get '[HTML] Html ))
+  :<|>
+    ( Get '[HTML] Html :<|> "index.html" :> Get '[HTML] Html )
 
 checkFrontEndApiType :: ExpectedFrontEndApi :~: FrontEndApi
 checkFrontEndApiType = Refl

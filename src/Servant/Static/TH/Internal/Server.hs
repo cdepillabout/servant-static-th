@@ -5,13 +5,15 @@
 module Servant.Static.TH.Internal.Server where
 
 import Data.Foldable (foldl1)
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty((:|)))
 import Language.Haskell.TH
        (Dec, Exp, Q, appE, clause, conT, funD, mkName, normalB,
         runIO, sigD)
 import Language.Haskell.TH.Syntax (addDependentFile)
 import Servant.API ((:<|>)((:<|>)))
 import Servant.Server (ServerT)
+import System.FilePath (takeFileName)
+
 
 import Servant.Static.TH.Internal.FileTree
 import Servant.Static.TH.Internal.Mime
@@ -26,13 +28,16 @@ fileTreeToServer :: FileTree -> Q Exp
 fileTreeToServer (FileTreeFile filePath fileContents) = do
   addDependentFile filePath
   MimeTypeInfo _ _ contentToExp <- extensionToMimeTypeInfoEx filePath
-  contentToExp fileContents
+  let fileName = takeFileName filePath
+  case fileName of
+    "index.html" -> combineWithServantOr $ contentToExp fileContents :| [contentToExp fileContents]
+    _ -> contentToExp fileContents
 fileTreeToServer (FileTreeDir _ fileTrees) =
   combineWithServantOr $ fmap fileTreeToServer fileTrees
 
 -- | Take a template directory argument as a 'FilePath' and create a 'ServerT'
 -- function that serves the files under the directory.  Empty directories will
--- be ignored.
+-- be ignored. 'index.html' files will also be served at the root.
 --
 -- Note that the file contents will be embedded in the function.  They will
 -- not be served dynamically at runtime.  This makes it easy to create a
@@ -73,6 +78,7 @@ fileTreeToServer (FileTreeDir _ fileTrees) =
 -- @
 --   type FrontEndAPI =
 --          \"js\" 'Servant.API.:>' \"test.js\" 'Servant.API.:>' 'Servant.API.Get' \'['JS'] 'Data.ByteString.ByteString'
+--     ':<|>' 'Servant.API.Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 --     ':<|>' \"index.html\" 'Servant.API.:>' 'Servant.API.Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 --
 --   frontEndServer :: 'Applicative' m => 'ServerT' FrontEndAPI m

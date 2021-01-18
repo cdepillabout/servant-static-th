@@ -33,6 +33,18 @@ serverTestsIO =
                 { matchHeaders = ["Content-Type" <:> "text/html;charset=utf-8"]
                 }
         in get "hello.html" `shouldRespondWith` expectedResp
+      it "index.html responds correctly and is html" $
+        let expectedResp =
+              "Index\n"
+                { matchHeaders = ["Content-Type" <:> "text/html;charset=utf-8"]
+                }
+        in get "index.html" `shouldRespondWith` expectedResp
+      it "root responds with index.html contents" $
+        let expectedResp =
+              "Index\n"
+                { matchHeaders = ["Content-Type" <:> "text/html;charset=utf-8"]
+                }
+        in get "" `shouldRespondWith` expectedResp
       it "dir/inner-file.html responds correctly" $
         get "dir/inner-file.html" `shouldRespondWith` "Inner File\n"
       it "non existing file gives 404" $

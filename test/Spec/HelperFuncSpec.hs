@@ -58,6 +58,9 @@ getFileTreeIgnoreEmptyTests =
               , FileTreeFile
                   (testDir </> "hello.html")
                   "Hello World\n"
+              , FileTreeFile
+                  (testDir </> "index.html")
+                  "Index\n"
               ]
         actualFileTree @?= expectedFileTree
     , testCase "fails on empty directory" $

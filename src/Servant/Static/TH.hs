@@ -22,10 +22,10 @@ Haskell web API that looks like this:
   dir\/
   ├── js
   │   └── test.js
-  └── hello.html
+  └── index.html
 @
 
-Here's the contents of @\"hello.html\"@ and @\"js\/test.js\"@:
+Here's the contents of @\"index.html\"@ and @\"js\/test.js\"@:
 
 @
   $ cat dir\/index.html
@@ -61,6 +61,7 @@ compile time:
 @
   type FrontEndAPI =
          \"js\" 'Servant.API.:>' \"test.js\" 'Servant.API.:>' 'Servant.API.Get' \'['JS'] 'Data.ByteString.ByteString'
+    ':<|>' 'Servant.API.Get' \'['HTML'] 'Html'
     ':<|>' \"index.html\" 'Servant.API.:>' 'Servant.API.Get' \'['HTML'] 'Html'
 
   frontEndServer :: 'Applicative' m => 'Servant.Server.ServerT' FrontEndAPI m
@@ -73,7 +74,7 @@ If this WAI application is running, it is possible to use @curl@ to access
 the server:
 
 @
-  $ curl localhost:8080\/hello.html
+  $ curl localhost:8080\/index.html
   \<p\>Hello World\<\/p\>
   $ curl localhost:8080\/js\/test.js
   console.log(\"hello world\");
