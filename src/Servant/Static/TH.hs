@@ -22,14 +22,17 @@ Haskell web API that looks like this:
   dir\/
   ├── js
   │   └── test.js
-  └── hello.html
+  ├── hello.html
+  └── index.html
 @
 
-Here's the contents of @\"hello.html\"@ and @\"js\/test.js\"@:
+Here's the contents of @\"hello.html\"@, @\"index.html\"@, and @\"js\/test.js\"@:
 
 @
-  $ cat dir\/index.html
+  $ cat dir\/hello.html
   \<p\>Hello World\<\/p\>
+  $ cat dir\/index.html
+  \<p\>This is the index\<\/p\>
   $ cat dir\/js\/test.js
   console.log(\"hello world\");
 @
@@ -60,19 +63,30 @@ compile time:
 
 @
   type FrontEndAPI =
-         \"js\" 'Servant.API.:>' \"test.js\" 'Servant.API.:>' 'Servant.API.Get' \'['JS'] 'Data.ByteString.ByteString'
+    -- index.html is served on the root, as well as from the path \"/index.html\".
+         'Servant.API.Get' \'['HTML'] 'Html'
     ':<|>' \"index.html\" 'Servant.API.:>' 'Servant.API.Get' \'['HTML'] 'Html'
+    -- hello.html is served from the path \"/hello.html\".
+    ':<|>' \"hello.html\" 'Servant.API.:>' 'Servant.API.Get' \'['HTML'] 'Html'
+    -- js/test.js is served from the path \"/js/test.js\".
+    ':<|>' \"js\" 'Servant.API.:>' \"test.js\" 'Servant.API.:>' 'Servant.API.Get' \'['JS'] 'Data.ByteString.ByteString'
 
   frontEndServer :: 'Applicative' m => 'Servant.Server.ServerT' FrontEndAPI m
   frontEndServer =
-         'pure' "console.log(\\"hello world\\");"
+         'pure' "\<p\>This is the index\<\/p\>"
+    ':<|>' 'pure' "\<p\>This is the index\<\/p\>"
     ':<|>' 'pure' "\<p\>Hello World\<\/p\>"
+    ':<|>' 'pure' "console.log(\\"hello world\\");"
 @
 
 If this WAI application is running, it is possible to use @curl@ to access
 the server:
 
 @
+  $ curl localhost:8080\/
+  \<p\>This is the index\<\/p\>
+  $ curl localhost:8080\/index.html
+  \<p\>This is the index\<\/p\>
   $ curl localhost:8080\/hello.html
   \<p\>Hello World\<\/p\>
   $ curl localhost:8080\/js\/test.js

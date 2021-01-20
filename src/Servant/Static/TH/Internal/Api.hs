@@ -21,8 +21,13 @@ fileTreeToApiType :: FileTree -> Q Type
 fileTreeToApiType (FileTreeFile filePath _) = do
   addDependentFile filePath
   MimeTypeInfo mimeT respT _ <- extensionToMimeTypeInfoEx filePath
-  let fileNameLitT = litT $ strTyLit $ takeFileName filePath
-  [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
+  let fileName = takeFileName filePath
+  let fileNameLitT = litT $ strTyLit fileName
+  case fileName of
+    -- We special-case files called "index.html" and generate a type that serves on both
+    -- the root, and under the path "index.html".
+    "index.html" -> [t|Get '[$(mimeT)] $(respT) :<|> $(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
+    _ -> [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
   let fileNameLitT = litT $ strTyLit $ takeFileName filePath
   in [t|$(fileNameLitT) :> $(combineWithServantOrT nonEmptyApiTypesQ)|]
@@ -40,7 +45,7 @@ combineWithType combiningType = appT . appT combiningType
 
 -- | Take a template directory argument as a 'FilePath' and create a Servant
 -- type representing the files in the directory.  Empty directories will be
--- ignored.
+-- ignored. @index.html@ files will also be served at the root.
 --
 -- For example, assume the following directory structure:
 --
@@ -66,6 +71,7 @@ combineWithType combiningType = appT . appT combiningType
 -- @
 --   type FrontEndAPI =
 --          \"js\" ':>' \"test.js\" ':>' 'Get' \'['JS'] 'Data.ByteString.ByteString'
+--     ':<|>' 'Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 --     ':<|>' \"index.html\" ':>' 'Get' \'['Servant.HTML.Blaze.HTML'] 'Text.Blaze.Html.Html'
 -- @
 createApiType
