@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.0.0
+
+-   Serve any files called `index.html` on the root `/` as well as the path
+    `/index.html`. This makes servant-static-th operate similar to how web
+    servers like Apache or nginx work.
+    [#19](https://github.com/cdepillabout/servant-static-th/pull/19).
+    Thanks [@vendamere](https://github.com/vendamere)!
+
 ## v0.2.4.0
 
 -   Add a mime type for .wasm files
