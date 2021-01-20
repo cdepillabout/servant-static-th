@@ -24,8 +24,8 @@ fileTreeToApiType (FileTreeFile filePath _) = do
   let fileName = takeFileName filePath
   let fileNameLitT = litT $ strTyLit fileName
   case fileName of
-    -- We special case files called "index.html" and generate a type that serves on both
-    -- the root, and under the path "index.hmlt".
+    -- We special-case files called "index.html" and generate a type that serves on both
+    -- the root, and under the path "index.html".
     "index.html" -> [t|Get '[$(mimeT)] $(respT) :<|> $(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
     _ -> [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
@@ -45,7 +45,7 @@ combineWithType combiningType = appT . appT combiningType
 
 -- | Take a template directory argument as a 'FilePath' and create a Servant
 -- type representing the files in the directory.  Empty directories will be
--- ignored. 'index.html' files will also be served at the root.
+-- ignored. @index.html@ files will also be served at the root.
 --
 -- For example, assume the following directory structure:
 --
