@@ -21,8 +21,11 @@ import Servant.Static.TH.Internal.Mime
 combineWithExp :: Q Exp -> Q Exp -> Q Exp -> Q Exp
 combineWithExp combiningExp = appE . appE combiningExp
 
-combineWithServantOr :: NonEmpty (Q Exp) -> Q Exp
-combineWithServantOr = foldl1 $ combineWithExp [e|(:<|>)|]
+combineWithServantOr :: Q Exp -> Q Exp -> Q Exp
+combineWithServantOr = combineWithExp [e|(:<|>)|]
+
+combineMultiWithServantOr :: NonEmpty (Q Exp) -> Q Exp
+combineMultiWithServantOr = foldl1 combineWithServantOr
 
 fileTreeToServer :: FileTree -> Q Exp
 fileTreeToServer (FileTreeFile filePath fileContents) = do
@@ -30,10 +33,15 @@ fileTreeToServer (FileTreeFile filePath fileContents) = do
   MimeTypeInfo _ _ contentToExp <- extensionToMimeTypeInfoEx filePath
   let fileName = takeFileName filePath
   case fileName of
-    "index.html" -> combineWithServantOr $ contentToExp fileContents :| [contentToExp fileContents]
+    "index.html" ->
+      combineWithServantOr
+        -- content to serve on the root
+        (contentToExp fileContents)
+        -- content to serve on the path "index.html"
+        (contentToExp fileContents)
     _ -> contentToExp fileContents
 fileTreeToServer (FileTreeDir _ fileTrees) =
-  combineWithServantOr $ fmap fileTreeToServer fileTrees
+  combineMultiWithServantOr $ fmap fileTreeToServer fileTrees
 
 -- | Take a template directory argument as a 'FilePath' and create a 'ServerT'
 -- function that serves the files under the directory.  Empty directories will
@@ -91,7 +99,7 @@ createServerExp
   -> Q Exp
 createServerExp templateDir = do
   fileTree <- runIO $ getFileTreeIgnoreEmpty templateDir
-  combineWithServantOr $ fmap fileTreeToServer fileTree
+  combineMultiWithServantOr $ fmap fileTreeToServer fileTree
 
 -- | This is similar to 'createServerExp', but it creates the whole function
 -- declaration.
