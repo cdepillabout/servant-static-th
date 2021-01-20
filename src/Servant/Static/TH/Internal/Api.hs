@@ -24,6 +24,8 @@ fileTreeToApiType (FileTreeFile filePath _) = do
   let fileName = takeFileName filePath
   let fileNameLitT = litT $ strTyLit fileName
   case fileName of
+    -- We special case files called "index.html" and generate a type that serves on both
+    -- the root, and under the path "index.hmlt".
     "index.html" -> [t|Get '[$(mimeT)] $(respT) :<|> $(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
     _ -> [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =

@@ -22,10 +22,11 @@ Haskell web API that looks like this:
   dir\/
   ├── js
   │   └── test.js
+  ├── hello.html
   └── index.html
 @
 
-Here's the contents of @\"index.html\"@ and @\"js\/test.js\"@:
+Here's the contents of @\"hello.html\"@, @\"index.html\"@ and @\"js\/test.js\"@:
 
 @
   $ cat dir\/index.html
