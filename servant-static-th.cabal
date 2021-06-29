@@ -71,6 +71,7 @@ test-suite servant-static-th-doctest
   build-depends:       base
                      , doctest
                      , Glob
+                     , servant-static-th
   default-language:    Haskell2010
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
@@ -88,6 +89,7 @@ test-suite servant-static-th-test
                      , bytestring
                      , directory
                      , filepath
+                     , hspec
                      , hspec-wai
                      , tasty
                      , tasty-hspec
