@@ -8,11 +8,12 @@ module Spec.ServerSpec where
 import Data.Proxy (Proxy(Proxy))
 import Network.Wai (Application)
 import Servant.Server (serve)
+import Test.Hspec (it)
 import Test.Hspec.Wai
        (ResponseMatcher(matchHeaders), (<:>), get, shouldRespondWith,
         with)
 import Test.Tasty (TestTree)
-import Test.Tasty.Hspec (testSpec, it)
+import Test.Tasty.Hspec (testSpec)
 
 import Servant.Static.TH (createApiAndServerDecs)
 

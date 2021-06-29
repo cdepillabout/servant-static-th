@@ -89,6 +89,7 @@ test-suite servant-static-th-test
                      , bytestring
                      , directory
                      , filepath
+                     , hspec
                      , hspec-wai
                      , tasty
                      , tasty-hspec
