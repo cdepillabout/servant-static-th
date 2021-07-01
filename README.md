@@ -3,7 +3,6 @@ Servant.Static.TH
 ==================
 
 [![Build Status](https://github.com/cdepillabout/servant-static-th/workflows/CI/badge.svg)](https://github.com/cdepillabout/servant-static-th/actions)
-[![Build Status](https://secure.travis-ci.org/cdepillabout/servant-static-th.svg)](http://travis-ci.org/cdepillabout/servant-static-th)
 [![Hackage](https://img.shields.io/hackage/v/servant-static-th.svg)](https://hackage.haskell.org/package/servant-static-th)
 [![Stackage LTS](http://stackage.org/package/servant-static-th/badge/lts)](http://stackage.org/lts/package/servant-static-th)
 [![Stackage Nightly](http://stackage.org/package/servant-static-th/badge/nightly)](http://stackage.org/nightly/package/servant-static-th)
