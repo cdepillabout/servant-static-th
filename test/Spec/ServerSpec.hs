@@ -16,7 +16,8 @@ import Test.Hspec.Wai ( ResponseMatcher(..)
                       , with
                       , MatchBody )
 import Test.Tasty (TestTree)
-import Test.Tasty.Hspec (testSpec, it,)
+import Test.Tasty.Hspec (testSpec)
+import Test.Hspec (it)
 
 import Servant.Static.TH (createApiAndServerDecs)
 
