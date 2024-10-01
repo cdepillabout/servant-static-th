@@ -27,7 +27,6 @@ import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy as LByteString
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Monoid ((<>))
 import Data.Proxy (Proxy)
 import Data.Text (pack, unpack)
 import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
@@ -76,7 +75,8 @@ byteStringToExp byteString = do
 
 utf8ByteStringToExp :: ByteString -> Q Exp
 utf8ByteStringToExp byteString =
-  let stringExp = stringE . unpack $ decodeUtf8With lenientDecode byteString
+  let stringExp :: Q Exp
+      stringExp = stringE . unpack $ decodeUtf8With lenientDecode byteString
       packedExp = appE (varE 'pack) stringExp
       byteStringExp = appE (varE 'encodeUtf8) packedExp
   in appE (varE 'pure) byteStringExp

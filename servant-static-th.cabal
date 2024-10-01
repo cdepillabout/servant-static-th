@@ -30,7 +30,7 @@ library
                      , Servant.Static.TH.Internal.Mime
                      , Servant.Static.TH.Internal.Server
                      , Servant.Static.TH.Internal.Util
-  build-depends:       base >= 4.8 && < 5
+  build-depends:       base >= 4.15 && < 5
                      , blaze-html
                      , bytestring
                      , containers
