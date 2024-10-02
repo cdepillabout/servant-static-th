@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0.1
+
+-   Few small fixes to make sure tests build with recent versions of GHC.
+    [#22](https://github.com/cdepillabout/servant-static-th/pull/22).
+    Thanks [@blackheaven](https://github.com/blackheaven)!
+
 ## v1.0.0.0
 
 -   Serve any files called `index.html` on the root `/` as well as the path
