@@ -5,7 +5,6 @@
 
 module Servant.Static.TH.Internal.Api where
 
-import Data.Foldable (foldl1)
 import Data.List.NonEmpty (NonEmpty)
 import Language.Haskell.TH
        (Dec, Q, Type, appT, litT, mkName,
@@ -22,14 +21,16 @@ fileTreeToApiType (FileTreeFile filePath _) = do
   addDependentFile filePath
   MimeTypeInfo mimeT respT _ <- extensionToMimeTypeInfoEx filePath
   let fileName = takeFileName filePath
-  let fileNameLitT = litT $ strTyLit fileName
+  let fileNameLitT :: Q Type
+      fileNameLitT = litT $ strTyLit fileName
   case fileName of
     -- We special-case files called "index.html" and generate a type that serves on both
     -- the root, and under the path "index.html".
     "index.html" -> [t|Get '[$(mimeT)] $(respT) :<|> $(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
     _ -> [t|$(fileNameLitT) :> Get '[$(mimeT)] $(respT)|]
 fileTreeToApiType (FileTreeDir filePath fileTrees) =
-  let fileNameLitT = litT $ strTyLit $ takeFileName filePath
+  let fileNameLitT :: Q Type
+      fileNameLitT = litT $ strTyLit $ takeFileName filePath
   in [t|$(fileNameLitT) :> $(combineWithServantOrT nonEmptyApiTypesQ)|]
   where
     nonEmptyApiTypesQ :: NonEmpty (Q Type)

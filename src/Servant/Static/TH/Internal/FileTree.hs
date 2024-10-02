@@ -18,7 +18,6 @@ import qualified Data.ByteString as ByteString
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty((:|)))
 import Data.Maybe (catMaybes)
-import Data.Monoid ((<>))
 import System.Directory
        (doesDirectoryExist, doesFileExist, listDirectory)
 import System.FilePath ((</>))

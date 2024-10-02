@@ -3,7 +3,6 @@ module Main (main) where
 
 import Prelude
 
-import Data.Monoid ((<>))
 import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
 

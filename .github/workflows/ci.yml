@@ -11,6 +11,7 @@ jobs:
     name: cabal / ghc-${{ matrix.ghc }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -18,58 +19,84 @@ jobs:
         cabal:
           - "latest"
         ghc:
-          - "8.6.5"
-          - "8.8.4"
-          - "8.10.4"
+          - "9.2"
+          - "9.4"
+          - "9.6"
+          - "9.8"
+          - "9.10"
 
     steps:
-    - uses: actions/checkout@v2
-      #if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/master'
+    - uses: actions/checkout@v4
 
-    - uses: haskell/actions/setup@v1
-      id: setup-haskell-cabal
-      name: Setup Haskell
+    - name: Setup Haskell
+      uses: haskell-actions/setup@v2
+      id: setup
       with:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
+        cabal-update: true
 
-    - uses: actions/cache@v1
-      name: Cache cabal-store
+    - name: Configure the build
+      run: |
+        cabal configure --enable-tests --enable-benchmarks --disable-documentation
+        # Generate dist-newstyle/cache/plan.json for the cache key.
+        cabal build all --dry-run
+
+    - name: Restore cached dependencies
+      uses: actions/cache/restore@v4
+      id: cache
+      env:
+        key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
       with:
-        path: ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
-        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal
+        path: ${{ steps.setup.outputs.cabal-store }}
+        key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+        restore-keys: ${{ env.key }}-
+
+    - name: Install dependencies
+      # If we had an exact cache hit, the dependencies will be up to date.
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cabal build all --only-dependencies
+
+    # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
+    - name: Save cached dependencies
+      uses: actions/cache/save@v4
+      # If we had an exact cache hit, trying to save the cache would error because of key clash.
+      if: steps.cache.outputs.cache-hit != 'true'
+      with:
+        path: ${{ steps.setup.outputs.cabal-store }}
+        key: ${{ steps.cache.outputs.cache-primary-key }}
 
     - name: Build
       run: |
-        cabal update
-        cabal build all --enable-tests --enable-benchmarks --write-ghc-environment-files=always --flags="buildexample"
+        cabal build all --enable-tests --enable-benchmarks --flags="buildexample"
 
     - name: Test
       run: |
-        cabal test all --enable-tests
+        cabal test all --enable-tests --enable-benchmarks --flags="buildexample"
 
   stack:
     name: stack / ubuntu-latest
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        stack: ["latest"]
 
     steps:
-    - uses: actions/checkout@v2
-      #if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/master'
+    - uses: actions/checkout@v4
 
-    - uses: haskell/actions/setup@v1
-      name: Setup Haskell Stack
+    - name: Setup Haskell Stack
+      uses: haskell-actions/setup@v2
+      id: setup
       with:
-        stack-version: ${{ matrix.stack }}
+        stack-version: latest
         enable-stack: true
 
-    - uses: actions/cache@v1
+    # TODO: As far as I can tell, caching for stack doesn't work with
+    # recent haskell-actions/setup:
+    # https://github.com/haskell-actions/setup/issues/86
+    # Need to figure out the best way to do this.
+    - uses: actions/cache@v4
       name: Cache ~/.stack
       with:
-        path: ~/.stack
-        key: ${{ runner.os }}-${{ matrix.ghc }}-stack
+        path: ${{ steps.setup.outputs.stack-root }}
+        key: ${{ runner.os }}-stack
 
     - name: Build
       run: |
@@ -77,4 +104,4 @@ jobs:
 
     - name: Test
       run: |
-        stack test
+        stack test --bench --no-run-benchmarks --flag servant-static-th:buildexample

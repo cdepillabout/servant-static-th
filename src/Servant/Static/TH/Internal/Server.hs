@@ -4,12 +4,11 @@
 
 module Servant.Static.TH.Internal.Server where
 
-import Data.Foldable (foldl1)
-import Data.List.NonEmpty (NonEmpty((:|)))
+import Data.List.NonEmpty (NonEmpty)
 import Language.Haskell.TH
        (Dec, Exp, Q, appE, clause, conT, funD, mkName, normalB,
         runIO, sigD)
-import Language.Haskell.TH.Syntax (addDependentFile)
+import Language.Haskell.TH.Syntax (Type, addDependentFile)
 import Servant.API ((:<|>)((:<|>)))
 import Servant.Server (ServerT)
 import System.FilePath (takeFileName)
@@ -126,6 +125,7 @@ createServerDec
   -> Q [Dec]
 createServerDec apiName serverName templateDir =
   let funcName = mkName serverName
+      sigTypeQ :: Q Type
       sigTypeQ =
           [t|forall m. Applicative m => ServerT $(conT (mkName apiName)) m|]
       signatureQ = sigD funcName sigTypeQ
