@@ -64,16 +64,21 @@ executable servant-static-th-example
   else
     buildable:         False
 
-test-suite servant-static-th-doctest
-  type:                exitcode-stdio-1.0
-  main-is:             DocTest.hs
-  hs-source-dirs:      test
-  build-depends:       base
-                     , doctest
-                     , Glob
-                     , servant-static-th
-  default-language:    Haskell2010
-  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+-- TODO: By default, recent versions of cabal don't run tests in
+-- an environment that would allow doctests to work.  This needs
+-- to be updated to use a library like cabal-doctest, but there
+-- are also various problems with that:
+-- https://github.com/cdepillabout/pretty-simple/issues/82#issuecomment-2387289781
+-- test-suite servant-static-th-doctest
+--   type:                exitcode-stdio-1.0
+--   main-is:             DocTest.hs
+--   hs-source-dirs:      test
+--   build-depends:       base
+--                      , doctest
+--                      , Glob
+--                      , servant-static-th
+--   default-language:    Haskell2010
+--   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
 test-suite servant-static-th-test
   type:                exitcode-stdio-1.0
